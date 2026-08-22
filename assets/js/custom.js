@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const cover = document.querySelector('.cover');
   if (cover && bannerImages.length) {
     cover.style.backgroundImage = `url(${img(pick(bannerImages))})`;
+    // Only a cover with a picture earns the taller banner; without this a site
+    // that hasn't supplied coverImages yet gets a tall empty band instead of a
+    // plain title bar. See .cover in _base.scss.
+    cover.classList.add('has-image');
   }
 
   // Randomize <aside> background images

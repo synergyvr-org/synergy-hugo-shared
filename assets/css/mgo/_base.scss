@@ -16,12 +16,42 @@ a:hover, a:active, a:focus {
 .cover {
   background-size: cover;
   background-position: center;
+  // The title alone used to set the height, so the banner stayed ~146px tall no
+  // matter how wide the window got, and a wide screen showed a sliver of the
+  // screenshot: 40% of its height at 1356px, 27% at 1920px. Scaling the height
+  // with the viewport (to a ceiling, so it never eats the whole screen) shows
+  // roughly two-thirds instead.
+  // Only when there's actually a picture to show: custom.js adds .has-image
+  // after it sets one, so a site without coverImages keeps a plain title bar
+  // rather than a tall empty band.
+  &.has-image {
+    min-height: clamp(180px, 20vw, 360px);
+    // Title sits at the bottom of the image rather than floating in the middle.
+    display: flex;
+    align-items: flex-end;
+  }
   padding: 2rem 0;
+  position: relative;
+  // A scrim under the title. These backgrounds are photographs, and the bright
+  // ones (daylight sky, snow) leave white text unreadable on a text-shadow
+  // alone. It's a pseudo-element because custom.js sets the screenshot as an
+  // inline background-image, which would overwrite a gradient set here.
+  &.has-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.2) 45%,
+      rgba(0, 0, 0, 0) 75%);
+    pointer-events: none;
+  }
   h1 {
     text-shadow: rgba(0,0,0,0.8) 1px 0 8px;
     line-height: 1em;
     overflow-wrap: normal;
     hyphens: manual;
+    position: relative; // above the scrim
   }
 }
 

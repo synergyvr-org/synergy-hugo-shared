@@ -118,7 +118,9 @@ custom properties. `assets/css/mgo/_brand-fus.scss` is the example that's actual
 
 ### List-specific images
 
-Skyrim art is shared, since it isn't specific to any one list. That includes the Seal of Akatosh (a.k.a. the Skyrim logo) page background tile and the posterized artwork behind alert asides, which are referenced in `_layout.scss`, `_retina.scss`, and `_asides.scss`.
+Skyrim art is shared, since it isn't specific to any one list. That includes the Seal of Akatosh (a.k.a. the Skyrim logo) page background tile and the posterized artwork behind alert asides, which are referenced in `_layout.scss` and `_asides.scss`.
+
+The tile is translucent (`background-tile-alpha.png`, alpha peaking at 45/255), so the page color comes from **`--mgo-bg`** in the site's palette and the pattern rides on top. That means a site can recolor the whole page — warmer, cooler, lighter — without needing its own tile. It's a 400px asset drawn at 200px, so it's already hi-DPI and there's no separate retina rule.
 
 The two randomized sets are driven from config rather than hardcoded, so a site can supply its own:
 

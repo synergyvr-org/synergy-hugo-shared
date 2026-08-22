@@ -2,7 +2,13 @@
 
 body {
   font-size: 1.2rem;
-  background: url(../images/background-tile.png);
+  // The tile is a translucent overlay (alpha peaks at 45/255), so the page
+  // colour comes from --mgo-bg underneath and each site can lighten or cool it
+  // without needing its own tile. It's a 400px asset shown at 200px, which is
+  // why there's no separate hi-DPI rule any more.
+  background-color: var(--mgo-bg);
+  background-image: url(../images/background-tile-alpha.png);
+  background-size: 200px 200px;
   background-attachment: fixed;
 }
 
@@ -21,7 +27,9 @@ body {
     }
 
     &.active > a {
-      background: url(../images/background-tile.png);
+      background-color: var(--mgo-bg);
+      background-image: url(../images/background-tile-alpha.png);
+      background-size: 200px 200px;
       background-attachment: fixed;
     }
   }
