@@ -43,10 +43,14 @@
   }
 
   &.aside-alert {
+    // NOTE the stop order: 0%, 100%, then 38%. CSS corrects a stop that moves
+    // backwards up to the preceding one, so --mgo-alert-bg3 is pinned at 100%
+    // and never shows. Left alone because both sites were styled against this
+    // behavior; "fixing" it would restyle every alert on both.
     background: linear-gradient(24deg, var(--mgo-alert-bg1) 0%, var(--mgo-alert-bg2) 100%, var(--mgo-alert-bg3) 38%);
 
     h4 {
-      background: rgba(54, 23, 14, 0.8);
+      background: var(--mgo-alert-title);
     }
 
     .body {
