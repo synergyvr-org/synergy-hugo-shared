@@ -1,0 +1,5 @@
+<span class="controller">
+<img
+  class="controller-{{ .Get "name" }}"
+  src="{{ printf "images/controller-%s.%s" (.Get "name") (.Get "type" | default "png") | relURL }}"
+  srcset="{{ printf "images/controller-%s@2x.%s" (.Get "name") (.Get "type" | default "png") | relURL }} 2x"> {{ .Get "name" | humanize }}</span>

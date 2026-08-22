@@ -1,0 +1,15 @@
+# Defaults for the shared client-side image randomisers, consumed by
+# layouts/partials/custom-header.html. A site overrides these through
+# [params.images] in its own config.
+#
+# Skyrim art that ships with this module, used behind alert asides.
+asideArt:
+  - bg-amulet-of-mara.webp
+  - bg-clavicus-vile.webp
+  - bg-dragon-claw.webp
+  - bg-miraak.webp
+  - bg-molag-bal.webp
+  - bg-krosis.webp
+  - bg-daedric-helmet.webp
+  - bg-dwarven-helmet.webp
+  - bg-karstaags-skull.webp

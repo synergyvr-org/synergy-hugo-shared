@@ -1,0 +1,59 @@
+{{- /* A captioned image.
+
+         {{< caption name="mo2-run" type="webp" border="border" >}}Text{{< /caption >}}
+
+       Resolves the image one of two ways, so the two can coexist while images
+       are migrated:
+
+       1. `assets/images/<name>.<type>` -- the preferred home. The committed file
+          is the high-resolution master; Hugo derives the 1x from it, so there is
+          no second file to make or keep in sync, and the rendered <img> carries
+          width and height (no layout shift while it loads).
+
+       2. `static/images/<name>.<type>` -- the original arrangement, where a
+          matching `<name>@2x.<type>` has to exist alongside it. `no-retina="true"`
+          opts out where one doesn't. Only this path needs that flag.
+
+       Either way the image links to the full-size version for the lightbox. */ -}}
+{{- $name := .Get "name" -}}
+{{- $type := .Get "type" | default "png" -}}
+{{- $retina := not (.Get "no-retina") -}}
+{{- $asset := resources.Get (printf "images/%s.%s" $name $type) -}}
+
+{{- /* Build src / srcset / full-size href / dimensions for an image, from the
+       asset pipeline when the file lives in assets, else from static paths. */ -}}
+{{- $img := dict -}}
+{{- if $asset -}}
+  {{- $half := $asset.Resize (printf "%dx %s" (int (math.Round (mul $asset.Width 0.5))) $type) -}}
+  {{- $img = dict "src" $half.RelPermalink "srcset" (printf "%s 2x" $asset.RelPermalink)
+                  "href" $asset.RelPermalink "w" $half.Width "h" $half.Height -}}
+{{- else -}}
+  {{- $img = dict "src" (printf "images/%s.%s" $name $type | relURL)
+                  "srcset" (cond $retina (printf "%s 2x" (printf "images/%s@2x.%s" $name $type | relURL)) "")
+                  "href" (printf "images/%s%s.%s" $name (cond $retina "@2x" "") $type | relURL) -}}
+{{- end -}}
+
+<div class="img {{ .Get "border" | default "" }}">
+  <a href="{{ $img.href }}">
+    <img id="img-{{ $name }}" src="{{ $img.src }}"{{ with $img.srcset }} srcset="{{ . }}"{{ end }}{{ with $img.w }} width="{{ . }}" height="{{ $img.h }}"{{ end }}>
+  </a>
+  {{ if len .Params | le 4 }}
+  {{- $iconName := .Get "icon" -}}
+  {{- $iconAsset := resources.Get (printf "images/%s.%s" $iconName $type) -}}
+  <div class="caption flex">
+    <div>
+      {{- if $iconAsset -}}
+        {{- $iconHalf := $iconAsset.Resize (printf "%dx %s" (int (math.Round (mul $iconAsset.Width 0.5))) $type) -}}
+      <img src="{{ $iconHalf.RelPermalink }}" srcset="{{ $iconAsset.RelPermalink }} 2x" width="{{ $iconHalf.Width }}" height="{{ $iconHalf.Height }}">
+      {{- else -}}
+      <img src="{{ printf "images/%s.%s" $iconName $type | relURL }}"{{ if $retina }} srcset="{{ printf "images/%s@2x.%s" $iconName $type | relURL }} 2x"{{ end }}>
+      {{- end }}
+    </div>
+    <div class="grow">
+      {{ .Inner | .Page.RenderString }}
+    </div>
+  </div>
+  {{ else }}
+  <div class="caption">{{ .Inner | .Page.RenderString }}</div>
+  {{ end }}
+</div>

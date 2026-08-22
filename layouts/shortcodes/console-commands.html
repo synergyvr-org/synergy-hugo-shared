@@ -1,0 +1,33 @@
+{{- /* Filterable, categorized console-command reference. Data lives in
+       data/console_commands.yaml; descriptions render as inline Markdown.
+       Filtering is handled in custom.js. */ -}}
+{{- $data := index site.Data "console_commands" -}}
+{{- $total := 0 -}}
+{{- range $data.categories }}{{ $total = add $total (len .commands) }}{{ end -}}
+<div class="cc">
+  <div class="cc-controls">
+    <div class="cc-search">
+      <input type="search" id="cc-filter" placeholder="Filter commands…" aria-label="Filter console commands" autocomplete="off">
+      <button type="button" id="cc-clear" class="cc-clear" aria-label="Clear filter" tabindex="-1">╳</button>
+    </div>
+    <span class="cc-count"><span id="cc-count">{{ $total }}</span> commands</span>
+  </div>
+  <div id="cc-list">
+    {{- range $data.categories }}
+    <section class="cc-category">
+      <h3 class="cc-category-title">{{ .name }}</h3>
+      <table class="cc-table">
+        <tbody>
+          {{- range .commands }}
+          <tr class="cc-row">
+            <td class="cc-cmd"><code>{{ .cmd }}</code></td>
+            <td class="cc-desc">{{ $.Page.RenderString .desc }}</td>
+          </tr>
+          {{- end }}
+        </tbody>
+      </table>
+    </section>
+    {{- end }}
+  </div>
+  <p id="cc-empty" class="cc-empty" hidden>No commands match your filter.</p>
+</div>

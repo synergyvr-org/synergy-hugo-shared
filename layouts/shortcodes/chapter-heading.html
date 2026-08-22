@@ -1,0 +1,33 @@
+<style>
+  {{ if .Get "img" }}
+  .chapter-heading .gif.{{ .Get "img" | default "" }} {
+    background-image: url({{ printf "images/%s.webp" (.Get "img" | default "") | relURL }});
+    background-size: 260px 208px;
+  }
+  .chapter-heading:hover .gif.{{ .Get "img" | default "" }} {
+    background-image: url({{ printf "images/anim-%s.gif" (.Get "img" | default "") | relURL }});
+  }
+  @media
+  only screen and (-webkit-min-device-pixel-ratio: 2),
+  only screen and (   min--moz-device-pixel-ratio: 2),
+  only screen and (     -o-min-device-pixel-ratio: 2/1),
+  only screen and (        min-device-pixel-ratio: 2),
+  only screen and (                min-resolution: 192dpi),
+  only screen and (                min-resolution: 2dppx) { 
+    .chapter-heading .gif.{{ .Get "img" | default "" }} {
+      background-image: url({{ printf "images/%s@2x.webp" (.Get "img" | default "") | relURL }});
+    }
+  }
+  {{ end }}
+</style>
+<a href="{{ .Get "href" | default "" }}" class="chapter-heading">
+  {{ if .Get "img" }}
+  <div class="gif {{ .Get "img" | default "" }}">
+    &nbsp;
+  </div>
+  {{ end }}
+  <div class="chapter-heading-body">
+    {{ .Inner | .Page.RenderString }}
+    <div class="read-more">Read more →</div>
+  </div>
+</a>

@@ -1,0 +1,5 @@
+<span class="svg steam">
+  <a href="https://store.steampowered.com/app/{{ .Get 0 }}" target="_blank">
+    <i class="fa-brands fa-steam"></i> {{ .Inner | .Page.RenderString }}
+  </a>
+</span>

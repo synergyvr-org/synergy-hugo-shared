@@ -1,0 +1,71 @@
+<!-- compat way of adding custom scripts in old Hugo documentation -->
+{{- $assetBusting := partialCached "assetbusting.gotmpl" site.Home }}
+
+{{- $filePath := "css/custom.css" }}
+{{- with (resources.Get (printf "/%s" $filePath)) }}
+    <link href="{{ .RelPermalink }}{{ $assetBusting }}" rel="stylesheet">
+{{- else }}
+  {{- if (fileExists (printf "/static/%s" $filePath)) }}
+    <link href="{{ printf "%s" $filePath | relURL }}{{ $assetBusting }}" rel="stylesheet">
+  {{- end }}
+{{- end }}
+
+{{- /* Everything custom.js needs that it can't work out for itself.
+
+       It is served as a plain asset, so it can't call absURL, and relative paths
+       inside it would resolve against the page rather than the script -- hence
+       passing the images base in. The image lists come from here too, rather
+       than being baked into the script, so a site can supply its own:
+
+         [params.synergy]
+           coverImages = ['ss-whiterun.webp', 'ss-riften.webp']
+           asideArt = ['bg-something.webp']
+
+       (Namespaced under `synergy` because Relearn already uses
+       `params.images` for social-card images.)
+
+       `cover` is a list's own screenshots, so it has no sensible shared default;
+       leave it unset and the cover randomiser simply doesn't run. `asideArt`
+       falls back to the Skyrim art this module ships (see data/synergy.yaml).
+
+       This is inline, so it runs before the deferred script. */ -}}
+{{- $imgs := site.Params.synergy | default dict -}}
+{{- $cover := $imgs.coverImages | default slice -}}
+{{- $aside := $imgs.asideArt | default (index (site.Data.synergy | default dict) "asideArt") | default slice -}}
+<script>window.synergyImages = {
+  base: {{ "images/" | absURL | jsonify | safeJS }},
+  cover: {{ $cover | jsonify | safeJS }},
+  asideArt: {{ $aside | jsonify | safeJS }}
+};</script>
+{{- $filePath := "js/custom.js" }}
+{{- with (resources.Get (printf "/%s" $filePath)) }}
+    <script src="{{ .RelPermalink }}{{ $assetBusting }}" defer></script>
+{{- else }}
+  {{- if (fileExists (printf "/static/%s" $filePath)) }}
+    <script src="{{ printf "%s" $filePath | relURL }}{{ $assetBusting }}" defer></script>
+  {{- end }}
+{{- end }}
+<style>
+:root {
+    --LOGO-font: Sovngarde, 'Roboto Flex';
+    --LOGO-font-size: 0.8rem;
+    --INTERNAL-MAIN-TITLES-H1-font: Sovngarde, 'Roboto Flex';
+    --INTERNAL-MAIN-TITLES-H2-font: Sovngarde, 'Roboto Flex';
+    --INTERNAL-MAIN-TITLES-H3-font: Sovngarde, 'Roboto Flex';
+    --VARIABLE-LINK-color: #66adff;
+}
+</style>
+{{ with resources.Get "css/mgo.scss" }}
+  {{ $opts := dict "transpiler" "libsass"
+                   "outputStyle" "expanded"
+                   "targetPath" "css/demo.css" }}
+  {{ with . | toCSS $opts }}
+    {{ if hugo.IsDevelopment }}
+      <link rel="stylesheet" href="{{ .RelPermalink }}">
+    {{ else }}  
+      {{ with . | minify | fingerprint }}
+        <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}

@@ -1,0 +1,122 @@
+# Console command reference, rendered by the `console-commands` shortcode on
+# content/reference/console-commands.md. Descriptions render as inline Markdown,
+# so backticks become code. Keep entries accurate to Skyrim; don't invent.
+categories:
+  - name: "God mode & survival"
+    commands:
+      - cmd: "tgm"
+        desc: "God mode: no damage, and unlimited stamina, magicka, carry weight, and arrows. Run it again to turn it off. (Most toggle commands work this way.)"
+      - cmd: "tim"
+        desc: "Immortal mode. You still take damage and your health can hit zero, but you won't die. A gentler `tgm`."
+      - cmd: "tdetect"
+        desc: "Toggle AI detection. While off, NPCs can't detect you, so nothing will ever spot you sneaking."
+      - cmd: "tcl"
+        desc: "Toggle collision. You pass through walls, floors, and everything else, and can fly by looking where you want to go. Great for escaping a spot you're stuck in."
+
+  - name: "Getting around"
+    commands:
+      - cmd: "coc <cell>"
+        desc: "Center on cell: teleport to a named interior or town, e.g. `coc whiterun` or `coc riverwood`. `coc qasmoke` drops you in the developers' test room full of every item."
+      - cmd: "tmm 1"
+        desc: "Reveal every map marker (so you can fast-travel anywhere). `tmm 0` hides them all again."
+      - cmd: "player.moveto <refID>"
+        desc: "Teleport yourself to a reference (an NPC, marker, or object) by its reference ID."
+      - cmd: "movetoqt"
+        desc: "Move to the current quest target. Handy when a quest marker is pointing somewhere unreachable."
+
+  - name: "Character, stats & skills"
+    commands:
+      - cmd: "player.setav <value> <n>"
+        desc: "Set an actor value outright, e.g. `player.setav speedmult 150` to move faster, or `player.setav carryweight 1000`."
+      - cmd: "player.modav <value> <n>"
+        desc: "Adjust an actor value by an amount (positive or negative), e.g. `player.modav health 100`."
+      - cmd: "advskill <skill> <xp>"
+        desc: "Grant a skill some experience, e.g. `advskill smithing 5000`. This counts toward leveling, unlike setting the skill directly."
+      - cmd: "player.advlevel"
+        desc: "Force an immediate level-up, letting you pick a perk and raise an attribute."
+      - cmd: "player.addperk <perkID>"
+        desc: "Unlock a specific perk by ID. Use `help` to find perk IDs."
+      - cmd: "showracemenu"
+        desc: "Reopen the full character creator. Useful for tweaking your look, but changing race here can scramble some stats, so save first. See [RaceMenu Presets](/tutorials/racemenu-presets)."
+      - cmd: "sexchange"
+        desc: "Switch your character's sex without touching anything else."
+
+  - name: "Items & gold"
+    commands:
+      - cmd: "player.additem <itemID> <count>"
+        desc: "Add items to your inventory by ID, e.g. `player.additem 0001397e 1` for a specific weapon."
+      - cmd: "player.additem f <count>"
+        desc: "Add gold. `f` is the short form of gold's ID (`0000000F`), so `player.additem f 5000` gives you 5,000 septims."
+      - cmd: "player.additem a <count>"
+        desc: "Add lockpicks (`a` is the short form of `0000000A`)."
+      - cmd: "player.removeitem <itemID> <count>"
+        desc: "Remove items from your inventory by ID."
+      - cmd: "player.equipitem <itemID>"
+        desc: "Equip an item you're carrying by ID."
+
+  - name: "NPCs & followers"
+    commands:
+      - cmd: "prid <refID>"
+        desc: "Pick a reference by ID to make it the console's target, without clicking: the mouse-free way to target an actor in VR. Finding the refID is the tricky part; see [Console](/reference/console#finding-a-reference-id)."
+      - cmd: "kill"
+        desc: "Kill the targeted actor. (Click an NPC with the console open to target it first.)"
+      - cmd: "resurrect"
+        desc: "Bring a dead targeted actor back to life. `resurrect 1` revives them with their gear intact."
+      - cmd: "moveto player"
+        desc: "Summon the targeted reference to you. Great for a follower who got left behind or stuck."
+      - cmd: "disable"
+        desc: "Make the targeted object or actor vanish. `enable` brings it back."
+      - cmd: "recycleactor"
+        desc: "Reset the targeted actor to its default state. Often fixes an NPC that's glitched, frozen, or T-posing."
+      - cmd: "setrelationshiprank player <n>"
+        desc: "Set how a targeted NPC feels about you, from `-4` (archenemy) to `4` (lover). `4` can make some NPCs marriageable or recruitable."
+      - cmd: "setessential <baseID> 1"
+        desc: "Make an NPC essential (unkillable) by base ID. Set to `0` to remove that protection."
+
+  - name: "Quests"
+    commands:
+      - cmd: "sqt"
+        desc: "List the quests you currently have targeted, along with their quest IDs. The starting point for fixing a stuck quest."
+      - cmd: "sqs <questID>"
+        desc: "Show every stage of a quest and which ones you've completed, so you can find where it broke."
+      - cmd: "getstage <questID>"
+        desc: "Report the stage a quest is currently on."
+      - cmd: "setstage <questID> <stage>"
+        desc: "Force a quest to a specific stage to push a stuck quest forward. Jump too far and you can skip content, so nudge it one stage at a time."
+      - cmd: "resetquest <questID>"
+        desc: "Reset a quest. A last resort for a hopelessly broken one; it can leave loose ends."
+      - cmd: "caqs"
+        desc: "Complete All Quest Stages, for _every_ quest in the game at once. This will wreck a real playthrough. Never run it on a save you care about."
+
+  - name: "World, time & weather"
+    commands:
+      - cmd: "set timescale to <n>"
+        desc: "Change how fast game time passes. The default is `20` (one real second is 20 game seconds); `1` runs time at real speed, which looks great for screenshots."
+      - cmd: "fw <weatherID>"
+        desc: "Force the weather to a specific type immediately."
+      - cmd: "sw <weatherID>"
+        desc: "Set the weather to transition to a type naturally, rather than snapping to it like `fw`."
+      - cmd: "tg"
+        desc: "Toggle grass display."
+      - cmd: "tll"
+        desc: "Toggle level-of-detail (LOD) rendering for distant terrain and objects."
+
+  - name: "Camera & screenshots"
+    commands:
+      - cmd: "tfc"
+        desc: "Toggle a free-flying camera, ideal for framing screenshots. `tfc 1` also freezes the action. Note that in VR the view is still head-tracked, so free cam behaves oddly."
+      - cmd: "sucsm <n>"
+        desc: "Set the free camera's movement speed, e.g. `sucsm 5` to slow it down for precise shots."
+      - cmd: "tm"
+        desc: "Toggle all menus and the HUD for a clean screenshot. Careful: this also hides the console itself, so you reopen it blind with the console key to toggle back."
+
+  - name: "Finding IDs & info"
+    commands:
+      - cmd: 'help "<term>" 0'
+        desc: 'Search the game for anything matching a term and print its IDs, e.g. `help "daedric" 0`. This is how you find the item, spell, perk, and NPC IDs the other commands need.'
+      - cmd: "getav <value>"
+        desc: "Read an actor value off the targeted actor (or yourself with `player.getav`), e.g. `player.getav health`."
+      - cmd: "save <name> 1"
+        desc: "Write a save plus a plain-text copy of it beside your saves (`<name>.ess.txt`). Search that file by name to find reference IDs without clicking, which is the handiest way to get a refID in VR. See [Console](/reference/console#finding-a-reference-id)."
+      - cmd: "qqq"
+        desc: "Quit the game instantly, no menus, no save. A fast exit when you need one."

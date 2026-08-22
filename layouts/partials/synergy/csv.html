@@ -1,0 +1,30 @@
+{{- /* Resolves a mod-list CSV and returns a dict:
+
+         rows  the parsed rows, ready to iterate
+         url   a public URL for the file, for a download link
+         name  its base filename, for the download attribute
+
+       Takes either an assets-relative name ("mgo-4-rc3.csv", preferred) or the
+       older "static/mgo-4-rc3.csv" form, so pages can migrate one at a time.
+
+       Assets are preferred because `resources.Get` registers a build dependency:
+       `hugo server` reloads when the CSV changes, which `os.ReadFile` does not
+       do. Unreferenced assets also stay out of the published site, whereas
+       everything in static/ is copied whether a page uses it or not.
+
+       Usage:
+         {{- $csv := partial "synergy/csv.html" "mgo-4-rc3.csv" -}}
+         {{- range $csv.rows }}…{{ end }}   <a href="{{ $csv.url }}">…</a>
+*/ -}}
+{{- $p := . | strings.TrimPrefix "static/" -}}
+{{- $out := dict -}}
+{{- with resources.Get $p -}}
+  {{- $out = dict "rows" (transform.Unmarshal (dict "delimiter" ",") .)
+                  "url" .RelPermalink
+                  "name" (path.Base $p) -}}
+{{- else -}}
+  {{- $out = dict "rows" (transform.Unmarshal (dict "delimiter" ",") (os.ReadFile (printf "static/%s" $p)))
+                  "url" ($p | relURL)
+                  "name" (path.Base $p) -}}
+{{- end -}}
+{{- return $out -}}
