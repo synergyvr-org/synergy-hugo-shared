@@ -9,11 +9,38 @@ const bannerImages = synergyImages.cover || [];
 const backgroundImages = synergyImages.asideArt || [];
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
+// A single background-image can't respond to pixel density, so a cover on a
+// retina display gets upscaled. image-set() fixes that where a site ships a
+// higher-resolution sibling: params.synergy.coverRetina holds the suffix (e.g.
+// "@2x"), and unset means the site has 1x only.
+//
+// Browsers that can't parse image-set() discard the whole declaration, which
+// would leave the banner with no picture at all — so probe it on a detached
+// element first and fall back to the plain URL. Older Safari wants the
+// -webkit- prefix, hence the two candidates.
+const coverRetina = synergyImages.coverRetina || '';
+const probe = document.createElement('div');
+const supported = (value) => {
+  probe.style.backgroundImage = '';
+  probe.style.backgroundImage = value;
+  return probe.style.backgroundImage !== '';
+};
+const coverImage = (name) => {
+  const one = img(name);
+  if (!coverRetina) return `url("${one}")`;
+  const two = img(name.replace(/(\.[a-z0-9]+)$/i, `${coverRetina}$1`));
+  for (const fn of ['image-set', '-webkit-image-set']) {
+    const value = `${fn}(url("${one}") 1x, url("${two}") 2x)`;
+    if (supported(value)) return value;
+  }
+  return `url("${one}")`;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // Randomize cover screenshots
   const cover = document.querySelector('.cover');
   if (cover && bannerImages.length) {
-    cover.style.backgroundImage = `url(${img(pick(bannerImages))})`;
+    cover.style.backgroundImage = coverImage(pick(bannerImages));
     // Only a cover with a picture earns the taller banner; without this a site
     // that hasn't supplied coverImages yet gets a tall empty band instead of a
     // plain title bar. See .cover in _base.scss.

@@ -32,9 +32,13 @@
 {{- $imgs := site.Params.synergy | default dict -}}
 {{- $cover := $imgs.coverImages | default slice -}}
 {{- $aside := $imgs.asideArt | default (index (site.Data.synergy | default dict) "asideArt") | default slice -}}
+{{- /* Suffix of the higher-resolution cover sibling, e.g. "@2x". Set it only
+       if every entry in coverImages has one; unset means the site ships 1x. */ -}}
+{{- $coverRetina := $imgs.coverRetina | default "" -}}
 <script>window.synergyImages = {
   base: {{ "images/" | absURL | jsonify | safeJS }},
   cover: {{ $cover | jsonify | safeJS }},
+  coverRetina: {{ $coverRetina | jsonify | safeJS }},
   asideArt: {{ $aside | jsonify | safeJS }}
 };</script>
 {{- $filePath := "js/custom.js" }}

@@ -90,6 +90,7 @@ Each site supplies the following:
   footerCredit = 'My List by [Synergy Team](https://synergyvr.org/)'
   footerCredit2 = 'Docs by Davey'
   coverImages = ['ss-whiterun.webp']        # optional; omit and the randomizer skips
+  coverRetina = '@2x'                       # optional; see below
   [params.synergy.brandLogos.fus]           # optional per-brand override
     src = 'fus-splash.webp'
     alt = 'FUS, a modlist for Skyrim VR by Kvitekvist and Cangar'
@@ -136,7 +137,21 @@ The two randomized sets are driven from config rather than hardcoded, so a site 
 
 Filenames in both lists are resolved against the site's `static/images/`, which Hugo unions with this module's, so those can live either place.
 
-Keep `[params.synergy]` **last** inside `[params]`. TOML assigns every key after a sub-table header to that sub-table, so scalars like `themeVariant` placed below it would end up in the wrong place. The same trap applies one level down: put `[params.synergy.modlist]` after `coverImages`, or it swallows the array.
+#### Retina covers
+
+The banners are CSS backgrounds, and a background image can't respond to pixel density on its own, so on a high-DPI screen the cover gets upscaled. Set `coverRetina` to the suffix of a higher-resolution sibling and `custom.js` switches to `image-set()` instead.
+
+```toml
+[params.synergy]
+  coverImages = ['ss-whiterun.webp']
+  coverRetina = '@2x'        # looks for ss-whiterun@2x.webp
+```
+
+Set it only if _every_ entry in `coverImages` has a corresponding `@2x` variant. A missing one doesn't gracefully fall back. It just breaks. Leave it unset for a 1x-only site.
+
+The descriptor is written as `2x` regardless of the actual difference in resolution. If the source image is actually 1.4x, that's fine. It will still look better. Browsers that can't parse `image-set()` fall back to the plain 1x, as `custom.js` employs feature-detection.
+
+Keep `[params.synergy]` _last_ inside `[params]`. TOML assigns every key after a sub-table header to that sub-table, so scalars like `themeVariant` placed below it would end up in the wrong place. The same applies one level down: put `[params.synergy.modlist]` after `coverImages`.
 
 ### Load order colors
 
