@@ -1,4 +1,11 @@
-// CSS custom properties (colors, fonts, MO2 separator palette)
+// Structural custom properties: Relearn overrides, fonts, and the MO2 separator
+// palette used by the mod-list mockups.
+//
+// A site's own colours are NOT here. Each site supplies assets/css/_site-palette.scss,
+// which the manifest imports after this file, so the shared layer carries no
+// list's identity. The MO2 colours below are a shared default because they model
+// MO2's own UI rather than any site's branding; a site can override them in its
+// palette file if its list colour-codes separators differently.
 
 :root {
   --INTERNAL-MENU-L-width: 260px;
@@ -13,28 +20,6 @@
   --INTERNAL-MAIN-TITLES-H1-font: Futura, 'Roboto Flex';
   --INTERNAL-MAIN-TITLES-H2-font: Futura, 'Roboto Flex';
   --INTERNAL-MAIN-TITLES-H3-font: Futura, 'Roboto Flex';
-  --VARIABLE-LINK-color: #BF7DAB;
-  --VARIABLE-LINK-HOVER-color: #D5AAC8;
-  --mgo-btn-inline: #c9843699;
-  --mgo-gold-dark: #c98436;
-  --mgo-gold: #D8A65F;
-  --mgo-gold-trans: #F8D07B33;
-  --mgo-red: #A23860;
-  --mgo-blue: #44375e;
-  --mgo-blue2: #664d87;
-  --mgo-bg: #202020;
-  --mgo-logo-bg1: #2A2A22;
-  --mgo-logo-bg2: #282820;
-  --mgo-alert-bg1: #4E1A26;
-  --mgo-alert-bg2: #F1CD8466;
-  --mgo-alert-bg3: #642F69;
-  --mgo-gradient1: #642F69;
-  --mgo-gradient2: #4E1A26;
-  --mgo-gradient3: #F1CD84;
-  --mgo-btw1: #7E2F3466;
-  --mgo-btw2: #B14C78cc;
-  --mgo-note1: #7E2F3433;
-  --mgo-note2: #B14C7866;
 
   --mo2-start: #f1cd84;
   --mo2-step1: #e1be7a;
@@ -64,6 +49,3 @@
   --mo2-amd: #8d7345;
 }
 
-#R-topbar > .topbar-wrapper {
-  --VARIABLE-LINK-HOVER-color: #D5AAC8;
-}

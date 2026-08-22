@@ -10,7 +10,7 @@ The sites use the [Relearn](https://github.com/McShelby/hugo-theme-relearn) them
 | ---- | -------- |
 | `layouts/shortcodes/` | <p>I love making unique styles for links, video players, asides and other widgets, but I hate remembering how the heck I structured them. Therefore I love Hugo shortcodes. <p>**Fancy links**: `nexus`, `steam`, `ext`, `github`, `discord`, `youtube` <p>**Decorated inline elements**: `btn-inline`, `file`, `control` <p>**Media**: `caption`, `video` <p>**Widgets**: `aside`, `disclosure`, `dialog`, `chapter-heading` <p>**Fancy widgets**: `modlist`, `modlist-diff`, `console-commands` |
 | `layouts/partials/`, `layouts/_default/`, `layouts/404.html` | Relearn theme overrides: logo, header, menu, base template, 404 page |
-| `assets/css/` | `mgo.scss` and its many partials (all the visuals) |
+| `assets/css/` | `mgo.scss` and its many partials (all the visuals). No palette: it imports `_site-palette.scss` from the site. |
 | `assets/js/custom.js` | Modlist filtering, disclosure deep-links, video player, background randomisers |
 | `data/` | `console_commands.yaml` is the Skyrim console reference that the `console-commands` shortcode renders. It's here rather than in a site because the console belongs to the game, not to any one list. `synergy.yaml` holds defaults for the client-side image randomisers. |
 | `static/images/` | Assets referenced by all of the above elements: controller glyphs, window chrome, webfonts, and the Skyrim art (page background tile, aside backdrops) |
@@ -76,8 +76,27 @@ That works identically, but it lives in a tracked file, so it has to go before p
 Each site supplies the following:
 
 - `content/`, its own `hugo.toml`, and any `data/`
+- `assets/css/_site-palette.scss` — **required**. This module imports it by name and
+  ships no palette of its own, so no list's colours are baked into the shared layer.
+  Copy one from an existing site and change the values.
 - Its logo, background art, and screenshots in `static/images/`
-- A brand palette, as needed
+- Sidebar logo and footer credits, via `[params.synergy]`:
+
+```toml
+[params.synergy]
+  logo = 'my-logo.webp'
+  logo2x = 'my-logo@2x.webp'                # optional
+  logoAlt = 'My List for Skyrim VR'         # optional, defaults to the site title
+  footerCredit = 'My List by [Synergy Team](https://synergyvr.org/)'
+  footerCredit2 = 'Docs by Davey'
+  coverImages = ['ss-whiterun.webp']        # optional; omit and the randomiser skips
+  [params.synergy.brandLogos.fus]           # optional per-brand override
+    src = 'fus-splash.webp'
+    alt = 'FUS, a modlist for Skyrim VR by Kvitekvist and Cangar'
+```
+
+With no logo configured the site title renders as text, so a new site looks
+deliberate rather than broken.
 
 Regarding `data/`: Hugo unions the site's data with this module's, but for list data it's _replacement_ rather than a _merge_. For example, add `data/console_commands.yaml` into a site with list-specific commands, and its `categories` list completely replaces the one from the module. If a list needs its own console entries, add them to the module.
 

@@ -6,6 +6,8 @@
 
 @import "mgo/fonts";
 @import "mgo/variables";
+// Supplied by the site, not this module. See _variables.scss for the contract.
+@import "site-palette";
 @import "mgo/layout";
 @import "mgo/base";
 @import "mgo/chapter-heading";

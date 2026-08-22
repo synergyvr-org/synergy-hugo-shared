@@ -35,15 +35,40 @@
   {{- end }}
 {{- end }}
 
-{{- /* Render logo container with all variants */}}
-{{- /* Branded sections supply their own logo; everything else gets MGO's. The
-       `brand` param arrives via the cache key set in partials/logo.html. */ -}}
+{{- /* The sidebar logo, supplied by the site rather than hardcoded here:
+
+         [params.synergy]
+           logo = 'my-logo.webp'
+           logo2x = 'my-logo@2x.webp'          # optional
+           logoAlt = 'My List for Skyrim VR'   # optional, defaults to the site title
+
+       A branded section can override it (the `brand` param arrives via the cache
+       key set in partials/logo.html):
+
+         [params.synergy.brandLogos.fus]
+           src = 'fus-splash.webp'
+           alt = 'FUS, a modlist for Skyrim VR by Kvitekvist and Cangar'
+
+       With no logo configured at all, the site title is rendered as text, so a
+       new site looks deliberate rather than broken. */ -}}
+{{- $sy := site.Params.synergy | default dict -}}
+{{- $brand := .Params.brand | default "" -}}
+{{- $src := "" -}}{{- $srcset := "" -}}{{- $cls := "" -}}
+{{- $alt := $sy.logoAlt | default site.Title -}}
+{{- with index ($sy.brandLogos | default dict) $brand -}}
+  {{- $src = .src -}}
+  {{- $alt = .alt | default $alt -}}
+  {{- $cls = printf "brand-logo brand-logo-%s" $brand -}}
+{{- else -}}
+  {{- $src = $sy.logo | default "" -}}
+  {{- $srcset = $sy.logo2x | default "" -}}
+{{- end -}}
 {{- if or $logoGroups $title }}
         <a href="{{ partial "permalink.gotmpl" (dict "to" site.Home) }}">
-          {{- if eq (.Params.brand | default "") "fus" }}
-          <img class="brand-logo brand-logo-fus" src="{{ "images/fus-splash.webp" | relURL }}" alt="FUS, a modlist for Skyrim VR by Kvitekvist and Cangar">
+          {{- if $src }}
+          <img{{ with $cls }} class="{{ . }}"{{ end }} src="{{ printf "images/%s" $src | relURL }}"{{ with $srcset }} srcset="{{ printf "images/%s" . | relURL }} 2x"{{ end }} alt="{{ $alt }}">
           {{- else }}
-          <img src="{{ "images/tes5-mgo-300.webp" | relURL }}" srcset="{{ "images/tes5-mgo-300@2x.webp" | relURL }} 2x" alt="Mad God's Overhaul for Skyrim VR">
+          <span class="logo-title">{{ $alt }}</span>
           {{- end }}
         </a>
 {{- end }}

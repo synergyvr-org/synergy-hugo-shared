@@ -1,2 +1,10 @@
-<p>MGO by <a href="https://synergyvr.org/">Synergy Team</a></p>
-<p>Docs by Davey</p>
+{{- /* Sidebar footer. Site-supplied so it doesn't name one list:
+
+         [params.synergy]
+           footerCredit = 'Synergy VR by [Synergy Team](https://synergyvr.org/)'
+           footerCredit2 = 'Docs by Davey'
+
+       Both are optional and rendered as Markdown, so links work. */ -}}
+{{- $sy := site.Params.synergy | default dict -}}
+{{- with $sy.footerCredit }}<p>{{ . | $.Page.RenderString }}</p>{{ end }}
+{{- with $sy.footerCredit2 }}<p>{{ . | $.Page.RenderString }}</p>{{ end }}
