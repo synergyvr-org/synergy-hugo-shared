@@ -18,6 +18,32 @@
 {{- $csvURL := $csv.url -}}
 {{- $csvName := $csv.name -}}
 {{- $rows := $csv.rows -}}
+{{- /* Arg 2 (optional): comma-separated separator labels to drop from the
+       rendered list, along with everything nested under them. For dev-only
+       sections a list ships but doesn't publish, e.g. "Testing Tools - NOT FOR
+       RELEASE". Matched against the label with its "#" markers stripped, so pass
+       it as it reads in MO2. Positional, like args 0 and 1.
+
+       Collected as row indices rather than a filtered copy of $rows: Hugo infers
+       an empty `slice` as []string, so building a new [][]string by appending is
+       a fight. Ints append cleanly, and the render loops all carry an index. */ -}}
+{{- $hide := .Get 2 | default "" -}}
+{{- $skip := slice -}}
+{{- if $hide -}}
+  {{- $hideNames := slice -}}
+  {{- range (split $hide ",") -}}{{- $hideNames = $hideNames | append (strings.TrimSpace .) -}}{{- end -}}
+  {{- $cut := -1 -}}
+  {{- range $ri, $row := $rows -}}{{- if in $skip $ri -}}{{- continue -}}{{- end -}}
+    {{- $n := index $row 1 -}}
+    {{- if hasSuffix $n "_separator" -}}
+      {{- $lbl := strings.TrimSuffix "_separator" $n -}}
+      {{- $d := sub (len $lbl) (len (strings.TrimLeft "#" $lbl)) -}}
+      {{- if and (ge $cut 0) (le $d $cut) -}}{{- $cut = -1 -}}{{- end -}}
+      {{- if in $hideNames (strings.TrimLeft "#" $lbl) -}}{{- $cut = $d -}}{{- end -}}
+    {{- end -}}
+    {{- if ge $cut 0 -}}{{- $skip = $skip | append $ri -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- /* Exceptions within the START HERE subtree that keep their own distinct
        styling (their own gradients, to be supplied later): Open Composite and
        Steam VR, plus Steam VR's children (Controller Bindings, VR FPS Stabilizer).
@@ -82,7 +108,7 @@
       {{- $shMax := 0 -}}
       {{- $inSH := false -}}
       {{- $shStack := slice -}}
-      {{- range $ri, $row := $rows -}}
+      {{- range $ri, $row := $rows -}}{{- if in $skip $ri -}}{{- continue -}}{{- end -}}
         {{- if gt $ri 0 -}}
           {{- $nm := index $row 1 -}}
           {{- if hasSuffix $nm "_separator" -}}
@@ -142,7 +168,7 @@
              so such a file renders as folders-plus-notes rather than as a run of
              hash-less plain labels. */ -}}
       {{- $flat := true -}}
-      {{- range $ri, $row := $rows -}}
+      {{- range $ri, $row := $rows -}}{{- if in $skip $ri -}}{{- continue -}}{{- end -}}
         {{- if and (gt $ri 0) (ge (len $row) 2) -}}
           {{- $nm := index $row 1 -}}
           {{- if and (hasSuffix $nm "_separator") (hasPrefix $nm "#") -}}
@@ -151,7 +177,7 @@
         {{- end -}}
       {{- end -}}
       {{- $topTotal := 0 -}}
-      {{- range $ri, $row := $rows -}}
+      {{- range $ri, $row := $rows -}}{{- if in $skip $ri -}}{{- continue -}}{{- end -}}
         {{- if gt $ri 0 -}}
           {{- $nm := index $row 1 -}}
           {{- if hasSuffix $nm "_separator" -}}
@@ -175,7 +201,7 @@
              child shares the color of the parent's next sibling. */ -}}
       {{- $stack := slice -}}
       {{- $topCount := 0 -}}
-      {{- range $i, $row := $rows -}}
+      {{- range $i, $row := $rows -}}{{- if in $skip $i -}}{{- continue -}}{{- end -}}
         {{- if eq $i 0 -}}{{- continue -}}{{- end -}}
         {{- $name := index $row 1 -}}
         {{- if hasSuffix $name "_separator" -}}
