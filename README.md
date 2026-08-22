@@ -1,6 +1,6 @@
 # synergy-hugo-shared
 
-This is the shared Hugo layer behind Synergy Team's documentation sites, beginning with Mad God's Overhaul, with others to follow. It is a Hugo Module, so each site imports it and pins the version it wants.
+This is the shared [Hugo](https://gohugo.io/) layer behind Synergy Team's documentation sites, beginning with Mad God's Overhaul, with others to follow. It is a Hugo Module, so each site imports it and pins the version it needs.
 
 The sites use the [Relearn](https://github.com/McShelby/hugo-theme-relearn) theme, and this module adds my custom shortcodes, styles, layout overrides and other assets that make a Synergy Team site look and behave the way it does. The individual sites then supply all of the list-specific content and branding.
 
@@ -41,14 +41,35 @@ require github.com/synergyvr-org/synergy-hugo-shared v0.0.0
 
 ### Working on this module and a site together
 
-Point the site at your local checkout instead of the published module:
+Point the site at a local checkout instead of the published module, and edits here show up in the site's `hugo server` right away.
+
+I recommend using an environment variable (fun how I write this like the audience is anyone but my future self, isn't it?), which keeps the dev-only path out of the repo, even in commented-out form:
+
+```bash
+HUGO_MODULE_REPLACEMENTS='github.com/synergyvr-org/synergy-hugo-shared -> /Users/you/wherever/synergy-hugo-shared' \
+  hugo server -D --disableFastRender --bind 0.0.0.0 --baseURL http://localhost:1313/mgo
+```
+
+The path has to be **absolute**. A relative one like `../hugo-shared` won't work.
+
+Without `--disableFastRender`, the dev server won't notice edits to this module's shortcodes, or to a site's load order CSVs.
+
+`--bind 0.0.0.0` makes the site reachable from other devices on the same network (always good to test on a real phone!), and spelling out `--baseURL` keeps the path prefix (`/mgo`) working locally.
+
+You can keep pulling the command out of your history, or you can alias it:
+
+```bash
+alias mgo-serve="HUGO_MODULE_REPLACEMENTS='github.com/synergyvr-org/synergy-hugo-shared -> /Users/you/wherever/synergy-hugo-shared' hugo server -D --disableFastRender --bind 0.0.0.0 --baseURL http://localhost:1313/mgo"
+```
+
+The alternative is a `replacements` line in the site's `hugo.toml` (absolute path here too):
 
 ```toml
 [module]
-  replacements = 'github.com/synergyvr-org/synergy-hugo-shared -> ../hugo-shared'
+  replacements = 'github.com/synergyvr-org/synergy-hugo-shared -> /Users/you/wherever/hugo-shared'
 ```
 
-Edits then show up in the site's local `hugo server` immediately. Before pushing the site, remove that line to go back to the pinned version from GitHub.
+That works identically, but it lives in a tracked file, so it has to go before pushing the site or the deploy breaks (CI has no such directory). Commenting it out is enough, since TOML ignores the line completely. The environment variable avoids that trap altogether, which is why it's the better habit.
 
 ## What a site provides
 
