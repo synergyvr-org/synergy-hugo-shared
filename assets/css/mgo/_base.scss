@@ -27,8 +27,12 @@ a:hover, a:active, a:focus {
   &.has-image {
     min-height: clamp(180px, 20vw, 360px);
     // Title sits at the bottom of the image rather than floating in the middle.
+    // Column direction matters: as a row flex item the h1 shrink-wraps to its
+    // own text, which leaves its `text-align: center` with nothing to center
+    // within and reads as left-aligned. In a column it stretches full width.
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    justify-content: flex-end;
   }
   padding: 2rem 0;
   position: relative;
