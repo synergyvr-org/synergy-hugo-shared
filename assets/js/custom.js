@@ -1,7 +1,7 @@
 // Image lists and the base path are supplied by
 // layouts/partials/custom-header.html, so this file carries neither a site path
 // nor any site's artwork. Both lists may be empty, in which case the
-// corresponding randomiser is skipped.
+// corresponding randomizer is skipped.
 const synergyImages = window.synergyImages || {};
 const imageBase = synergyImages.base || '/images/';
 const img = (name) => imageBase + name;
