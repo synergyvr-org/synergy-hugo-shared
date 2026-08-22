@@ -1,7 +1,7 @@
 {{- /* Renders a filterable table of the MGO mod list from a CSV in static/.
        Arg 0 (optional): CSV path relative to project root.
        Columns shown: Mod Name (with an enabled/disabled marker, linked to Nexus
-       when available) and Download File Name. Separator rows (name ending "_separator") become
+       when available) and the installed version. Separator rows (name ending "_separator") become
        human-readable headers with leading "#" turned into "▸". */ -}}
 {{- $path := .Get 0 | default "mgo-4-rc3.csv" -}}
 {{- /* Arg 1 (optional): in a flat list (no "#" depth markers), which separators
@@ -101,7 +101,7 @@
 
        These are deliberately muted against MO2's fully saturated fills, which
        glare on a dark page. Each keeps its hue (so the sections stay as
-       recognisable as they are in MO2) at roughly a third of the lightness, with
+       recognizable as they are in MO2) at roughly a third of the lightness, with
        pale text on top. Notes sit darker still, so the section headings lead and
        the commentary recedes. */ -}}
 {{- $numPalette := dict
@@ -124,7 +124,7 @@
     <thead>
       <tr>
         <th class="col-name">Mod Name</th>
-        <th class="col-file">Download File Name</th>
+        <th class="col-version">Version</th>
       </tr>
     </thead>
     <tbody>
@@ -357,7 +357,10 @@
         {{- else -}}
           {{- $status := index $row 0 -}}
           {{- $url := index $row 3 -}}
-          {{- $file := index $row 5 -}}
+          {{- /* Column 4 is the installed version; column 5 is the downloaded
+                 archive filename. The version is the useful one for readers
+                 comparing their install against the list. */ -}}
+          {{- $version := index $row 4 -}}
           {{- $enabled := eq $status "+" -}}
           {{- /* Indent a mod to match its folder, one level deeper (like a nested
                  separator): 32px × the enclosing folder's depth, landing on the
@@ -377,7 +380,7 @@
           {{ $name }}
           {{- end -}}
         </td>
-        <td class="col-file">{{ with $file }}<code>{{ . }}</code>{{ end }}</td>
+        <td class="col-version">{{ with $version }}<code>{{ . }}</code>{{ end }}</td>
       </tr>
         {{- end -}}
       {{- end -}}

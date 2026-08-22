@@ -142,9 +142,9 @@
     z-index: 1;
   }
 
-  // Download filenames stay monospaced, but drop the theme's eye-catching
+  // Versions stay monospaced, but drop the theme's eye-catching
   // inline-code pill (bright background/border/color) for something muted.
-  .col-file code {
+  .col-version code {
     font-size: 0.8rem;
     word-break: break-all;
     background: none;
