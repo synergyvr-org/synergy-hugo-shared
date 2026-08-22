@@ -1,0 +1,49 @@
+{{- /* Interpolates a color ramp and returns a dict:
+
+         bg   the interpolated color, as #rrggbb
+         fg   "#1a1a1a" or "#fff", whichever stays readable on it
+
+       Takes a dict:
+
+         stops  an ordered slice of "#rrggbb" strings (any length ≥ 1)
+         f      position along the ramp, 0–1 (clamped)
+
+       Interpolation is linear in sRGB between the two stops either side of f,
+       matching the hand-rolled ramps this replaces, so existing lists render
+       unchanged. The text color flips at luminance 0.438, the point where white
+       stops being the readable choice on these backgrounds.
+
+       Only the two stops bracketing f are converted, which also sidesteps
+       building a slice of RGB triples — Hugo types an empty `slice` from its
+       first append and then refuses a nested one.
+
+       Usage:
+         {{- $c := partial "synergy/ramp.html" (dict "stops" $stops "f" 0.25) -}}
+         style="background-color: {{ $c.bg }}; color: {{ $c.fg }};"
+*/ -}}
+{{- $stops := .stops -}}
+{{- $f := .f -}}
+{{- if lt $f 0.0 -}}{{- $f = 0.0 -}}{{- end -}}
+{{- if gt $f 1.0 -}}{{- $f = 1.0 -}}{{- end -}}
+{{- $n := len $stops -}}
+
+{{- $i := 0 -}}{{- $t := 0.0 -}}
+{{- if gt $n 1 -}}
+  {{- $seg := mul $f (sub $n 1) -}}
+  {{- $i = int (math.Floor $seg) -}}
+  {{- if gt $i (sub $n 2) -}}{{- $i = sub $n 2 -}}{{- end -}}
+  {{- $t = sub $seg $i -}}
+{{- end -}}
+{{- $a := partial "synergy/hex.html" (index $stops $i) -}}
+{{- $z := $a -}}
+{{- if gt $n 1 -}}{{- $z = partial "synergy/hex.html" (index $stops (add $i 1)) -}}{{- end -}}
+
+{{- /* Weighted form a(1-t) + zt, not a + (z-a)t: they differ in the last bit
+       at .5 boundaries, and this one matches the ramps being replaced. */ -}}
+{{- $u := sub 1.0 $t -}}
+{{- $r := int (math.Round (add (mul $a.r $u) (mul $z.r $t))) -}}
+{{- $g := int (math.Round (add (mul $a.g $u) (mul $z.g $t))) -}}
+{{- $b := int (math.Round (add (mul $a.b $u) (mul $z.b $t))) -}}
+{{- $lum := div (add (add (mul 0.299 $r) (mul 0.587 $g)) (mul 0.114 $b)) 255 -}}
+{{- return dict "bg" (printf "#%02x%02x%02x" $r $g $b)
+                "fg" (cond (gt $lum 0.438) "#1a1a1a" "#fff") -}}

@@ -3,9 +3,9 @@
 // Applied to any page carrying `brand = 'fus'` in its front matter (cascaded
 // from content/fus-load-order/_index.md), which puts `brand-fus` on <body>.
 // Because it lands on <body> rather than the content wrapper, the sidebar and
-// topbar are re-coloured along with the article.
+// topbar are re-colored along with the article.
 //
-// Colours are sampled from static/images/fus-splash.webp, clustered by hue
+// Colors are sampled from static/images/fus-splash.webp, clustered by hue
 // family: near-black navy base (#010813), cyan and blue aurora (#3fddff,
 // #42b9fc), magenta and violet ribbons (#ff48cf, #d488ff), and the gold of the
 // helmet-and-axes emblem (#fedca1).
@@ -13,7 +13,7 @@
 // NOTE: the mod list's folder separator gradient is computed in
 // layouts/shortcodes/modlist.html and emitted as an inline style, so it is not
 // affected by anything here. It keeps MGO's purple gradient for now, pending
-// direction on what those colours should become.
+// direction on what those colors should become.
 
 body.brand-fus {
   // -- Aurora accents ------------------------------------------------------

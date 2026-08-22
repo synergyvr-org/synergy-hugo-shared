@@ -77,7 +77,7 @@ Each site supplies the following:
 
 - `content/`, its own `hugo.toml`, and any `data/`
 - `assets/css/_site-palette.scss` — **required**. This module imports it by name and
-  ships no palette of its own, so no list's colours are baked into the shared layer.
+  ships no palette of its own, so no list's colors are baked into the shared layer.
   Copy one from an existing site and change the values.
 - Its logo, background art, and screenshots in `static/images/`
 - Sidebar logo and footer credits, via `[params.synergy]`:
@@ -134,4 +134,29 @@ The two randomised sets are driven from config rather than hardcoded, so a site 
 
 Filenames in both lists are resolved against the site's `static/images/`, which Hugo unions with this module's, so those can live either place.
 
-Keep `[params.synergy]` **last** inside `[params]`. TOML assigns every key after a sub-table header to that sub-table, so scalars like `themeVariant` placed below it would end up in the wrong place.
+Keep `[params.synergy]` **last** inside `[params]`. TOML assigns every key after a sub-table header to that sub-table, so scalars like `themeVariant` placed below it would end up in the wrong place. The same trap applies one level down: put `[params.synergy.modlist]` after `coverImages`, or it swallows the array.
+
+### Load order colors
+
+The `modlist` shortcode colors its MO2 section headers from the site, so no list's scheme lives in this module:
+
+```toml
+[params.synergy.modlist]
+  # The onboarding subtree's color gradient, and the separator name (as it reads in MO2).
+  subtree = ['#7ec8e3', '#2d6c88']
+  subtreeRoot = 'START HERE - EXPAND TO SETUP'
+  # Separators that are labels rather than sections: the list's title banner
+  # (matched on prefix, since the release text changes) and its end marker.
+  titlePrefix = 'Synergy VR - Beta Release'
+  plain = ['End Of List']
+  # Bands of color across the top-level folders, in order.
+  [[params.synergy.modlist.bands]]
+    stops = ['#f0a03c', '#c2661c', '#5a2f14']
+  [[params.synergy.modlist.bands]]
+    from = 'AI Improvements'
+    stops = ['#2a5f9e', '#16314f']
+```
+
+A band's `stops` are interpolated across however many top-level folders that band covers, and nested folders continue their parent's band. The first band starts at the top of the list. Each later one starts at its `from` folder. One band gives you a single continuous gradient. Several let a list match MO2 when its sections change hue partway down rather than fading evenly.
+
+Leave `modlist` out entirely and separators fall back to a neutral gray gradient, leaving it looking unfinished, so it will annoy you (me) enough to remember to change it.

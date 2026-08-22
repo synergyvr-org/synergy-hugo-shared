@@ -1,11 +1,11 @@
 // Structural custom properties: Relearn overrides, fonts, and the MO2 separator
 // palette used by the mod-list mockups.
 //
-// A site's own colours are NOT here. Each site supplies assets/css/_site-palette.scss,
+// A site's own colors are NOT here. Each site supplies assets/css/_site-palette.scss,
 // which the manifest imports after this file, so the shared layer carries no
-// list's identity. The MO2 colours below are a shared default because they model
+// list's identity. The MO2 colors below are a shared default because they model
 // MO2's own UI rather than any site's branding; a site can override them in its
-// palette file if its list colour-codes separators differently.
+// palette file if its list color-codes separators differently.
 
 :root {
   --INTERNAL-MENU-L-width: 260px;
