@@ -1,11 +1,11 @@
 <style>
   {{ if .Get "img" }}
   .chapter-heading .gif.{{ .Get "img" | default "" }} {
-    background-image: url({{ printf "images/%s.webp" (.Get "img" | default "") | relURL }});
+    background-image: url({{ printf "images/%s.webp" (.Get "img" | default "") | absURL }});
     background-size: 260px 208px;
   }
   .chapter-heading:hover .gif.{{ .Get "img" | default "" }} {
-    background-image: url({{ printf "images/anim-%s.gif" (.Get "img" | default "") | relURL }});
+    background-image: url({{ printf "images/anim-%s.gif" (.Get "img" | default "") | absURL }});
   }
   @media
   only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -15,7 +15,7 @@
   only screen and (                min-resolution: 192dpi),
   only screen and (                min-resolution: 2dppx) { 
     .chapter-heading .gif.{{ .Get "img" | default "" }} {
-      background-image: url({{ printf "images/%s@2x.webp" (.Get "img" | default "") | relURL }});
+      background-image: url({{ printf "images/%s@2x.webp" (.Get "img" | default "") | absURL }});
     }
   }
   {{ end }}
