@@ -1,4 +1,4 @@
-# Defaults for the shared client-side image randomisers, consumed by
+# Defaults for the shared client-side image randomizers, consumed by
 # layouts/partials/custom-header.html. A site overrides these through
 # [params.images] in its own config.
 #
