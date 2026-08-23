@@ -9,6 +9,19 @@ Anything marked **breaking** needs a matching change in the site before it works
 (usually a new key in `[params.synergy]` or a new file). See the README for what
 a site is expected to supply.
 
+## v0.8.3 — 2026-08-23
+
+### Fixed
+- The rest of the seam down the sidebar's right edge. Removing the topbar divider
+  in v0.8.1 left two more 1px borders behind, which is why the corner still
+  didn't look clean: `#R-header-topbar` draws one across the topbar's height in
+  `rgb(39,39,39)`, and `#R-header-wrapper` draws one down the full column in
+  `rgb(71,71,71)`. Both are neutral grays, lighter than near-black chrome but
+  duller than anything lighter, so on Synergy's slate they read as a dark seam
+  that changed shade where the topbar ends. Set on the two elements rather than
+  through `--MENU-TOPBAR-BORDER-color` and `--MENU-BORDER-color`, since the
+  latter also colors the active menu item's borders.
+
 ## v0.8.1 — 2026-08-23
 
 ### Fixed

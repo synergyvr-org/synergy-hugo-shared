@@ -42,3 +42,19 @@ ul.horizontal-nav {
               var(--mgo-gradient3) 38%);
   }
 }
+
+// The sidebar's right edge carries two 1px borders from the theme: one across
+// the topbar's height (#R-header-topbar, in rgb(39,39,39)) and one down the rest
+// of the column (#R-header-wrapper, in rgb(71,71,71)). Against near-black chrome
+// they read as an edge, but they're duller than any lighter panel, so on
+// Synergy's slate they became a dark seam running the full height of the page,
+// changing shade where the topbar ends.
+//
+// Colored here rather than through --MENU-TOPBAR-BORDER-color and
+// --MENU-BORDER-color, because the latter also colors the active menu item's
+// borders, which should stay. `transparent` shows the sidebar's own background
+// through the border box, so the column simply ends where its color does.
+#R-header-topbar,
+#R-header-wrapper {
+  border-inline-end-color: transparent;
+}
