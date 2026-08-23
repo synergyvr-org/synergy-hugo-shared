@@ -26,28 +26,35 @@ a:hover, a:active, a:focus {
   // rather than a tall empty band.
   &.has-image {
     min-height: clamp(180px, 20vw, 360px);
-    // Title sits at the bottom of the image rather than floating in the middle.
+    // Title centered in the image, vertically and horizontally.
     // Column direction matters: as a row flex item the h1 shrink-wraps to its
     // own text, which leaves its `text-align: center` with nothing to center
     // within and reads as left-aligned. In a column it stretches full width.
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
   }
   padding: 2rem 0;
   position: relative;
-  // A scrim under the title. These backgrounds are photographs, and the bright
-  // ones (daylight sky, snow) leave white text unreadable on a text-shadow
+  // A scrim behind the title. These backgrounds are photographs, and the bright
+  // ones (daylight sky, snow, ice) leave white text unreadable on a text-shadow
   // alone. It's a pseudo-element because custom.js sets the screenshot as an
   // inline background-image, which would overwrite a gradient set here.
+  //
+  // Weighted to the middle, following the title. With the old bottom-weighted
+  // fade the centered title sat where the scrim was only 0.16 alpha, and the
+  // iciest covers fell to 4.8:1 — passing, but with nothing to spare once a
+  // bright patch lands behind a letter. A soft band across the middle takes the
+  // same worst case back over 8:1 and reads as a vignette rather than a fade.
   &.has-image::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top,
-      rgba(0, 0, 0, 0.6) 0%,
-      rgba(0, 0, 0, 0.2) 45%,
-      rgba(0, 0, 0, 0) 75%);
+    background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.45) 42%,
+      rgba(0, 0, 0, 0.45) 58%,
+      rgba(0, 0, 0, 0) 100%);
     pointer-events: none;
   }
   h1 {
