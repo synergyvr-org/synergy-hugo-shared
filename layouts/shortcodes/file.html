@@ -1,5 +1,10 @@
-{{ if .Params }}
-  <span class="file"><i class="fa fa-{{ .Get 0 }}"></i> {{ .Inner | .Page.RenderString }}</span>
-{{ else }}
-  <span class="file">{{ .Inner | .Page.RenderString }}</span>
-{{ end }}
+{{- /* Styles a filename, path, or folder. Optional Font Awesome icon name as the
+       first argument (use `file-lines` for editable text files).
+
+       Trimmed for the same reason as btn-inline: without it, a filename at the
+       end of a sentence renders as "open ModOrganizer.exe ." */ -}}
+{{- if .Params -}}
+<span class="file"><i class="fa fa-{{ .Get 0 }}"></i> {{ .Inner | .Page.RenderString }}</span>
+{{- else -}}
+<span class="file">{{ .Inner | .Page.RenderString }}</span>
+{{- end -}}

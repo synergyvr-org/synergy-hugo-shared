@@ -157,12 +157,49 @@ document.addEventListener('DOMContentLoaded', function () {
   var rows = Array.prototype.slice.call(tbody.rows);
   var countEl = document.getElementById('modlist-count');
   var toggleAllBtn = document.getElementById('modlist-toggle-all');
+  var wrap = table.closest('.modlist');
 
   function isSep(r) { return r.classList.contains('modlist-separator'); }
   function isFolder(r) { return r.classList.contains('modlist-folder'); }
+  function depthOf(r) { return parseInt(r.getAttribute('data-depth'), 10) || 0; }
   function totalMods() { return rows.filter(function (r) { return !isSep(r); }).length; }
+  function filtering() { return input.value.trim() !== ''; }
 
   var folders = rows.filter(isFolder);
+
+  // The chain of folder rows enclosing each row, walked once here rather than on
+  // every keystroke. It's also what lets "show in list" open exactly the folders
+  // a row is buried under: the reveal and the hiding read the same chain, so
+  // they can't disagree about where a row lives.
+  //
+  // A separator carrying a depth closes any folder at that depth or deeper. That
+  // holds for the labels that aren't folders too (a list's title banner, its
+  // "End Of List" marker), which sit at the top level and so belong inside
+  // nothing — without the pop, collapsing the last folder would swallow the end
+  // marker. Depth-less separators (the authors' inline notes) are leaves, and
+  // nest inside whatever folder is open, like the mods around them.
+  var ancestors = new Map();
+  (function () {
+    var stack = [];
+    rows.forEach(function (r) {
+      var d = isSep(r) ? depthOf(r) : 0;
+      if (d >= 1) {
+        while (stack.length && depthOf(stack[stack.length - 1]) >= d) stack.pop();
+      }
+      ancestors.set(r, stack.slice());
+      if (isFolder(r)) stack.push(r);
+    });
+  })();
+
+  function chainOpen(r) {
+    return (ancestors.get(r) || []).every(function (f) {
+      return !f.classList.contains('collapsed');
+    });
+  }
+
+  // Cache each row's searchable text before the locate buttons go in, so the
+  // filter never has to re-read the DOM (and never sees the buttons).
+  rows.forEach(function (r) { r._text = r.textContent.toLowerCase(); });
   function allCollapsed() {
     return folders.length > 0 && folders.every(function (s) {
       return s.classList.contains('collapsed');
@@ -172,34 +209,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (toggleAllBtn) toggleAllBtn.textContent = allCollapsed() ? 'Expand all' : 'Collapse all';
   }
 
-  // A row is hidden by collapse when any enclosing folder (a preceding
-  // separator of shallower depth) is collapsed. We track the enclosing chain
-  // in a stack keyed by depth, so nested folders fold their children too.
+  // Filtering ignores the folder structure and shows every match wherever it
+  // lives; otherwise a row shows when every folder enclosing it is open. The
+  // `filtering` class on the wrapper is what puts the locate buttons on screen.
   function applyVisibility() {
     var q = input.value.trim().toLowerCase();
-    var filtering = q !== '';
-    var stack = [];
+    var filtered = q !== '';
     var shown = 0;
     rows.forEach(function (r) {
-      var visible;
-      if (filtering) {
-        visible = r.textContent.toLowerCase().indexOf(q) !== -1;
-      } else if (isFolder(r)) {
-        var depth = parseInt(r.getAttribute('data-depth'), 10) || 0;
-        while (stack.length && stack[stack.length - 1].depth >= depth) stack.pop();
-        visible = !stack.some(function (s) { return s.collapsed; });
-        stack.push({ depth: depth, collapsed: r.classList.contains('collapsed') });
-      } else {
-        // Leaves — mods and hash-less separators alike — are hidden when any
-        // enclosing folder is collapsed, but they don't open or close a folder
-        // context themselves. So a hash-less separator can be nested inside a
-        // folder (like a mod), it just can't have children of its own.
-        visible = !stack.some(function (s) { return s.collapsed; });
-      }
+      var visible = filtered ? r._text.indexOf(q) !== -1 : chainOpen(r);
       r.style.display = visible ? '' : 'none';
       if (visible && !isSep(r)) shown++;
     });
-    if (countEl) countEl.textContent = filtering ? shown : totalMods();
+    if (wrap) wrap.classList.toggle('filtering', filtered);
+    if (countEl) countEl.textContent = filtered ? shown : totalMods();
   }
 
   // Reflect a folder's state in its icon: open when expanded, closed when collapsed.
@@ -232,14 +255,68 @@ document.addEventListener('DOMContentLoaded', function () {
     r.setAttribute('aria-expanded', 'true');
   });
 
+  // Put a row back in context: drop the filter, open the folders it's buried
+  // under, and scroll to where it actually sits in the list. This is how a
+  // search behaves in MO2 — you find the row, then you want to see what's
+  // around it, which is usually the real question ("what loads after this?").
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function reveal(row) {
+    (ancestors.get(row) || []).forEach(function (f) { setFolderState(f, false); });
+    input.value = '';
+    applyVisibility();
+    updateToggleLabel();
+    rows.forEach(function (r) { r.classList.remove('modlist-located'); });
+    row.classList.add('modlist-located');
+    // Focus the row so the jump lands somewhere for keyboard and screen-reader
+    // users. Folders are already focusable; a leaf needs a tabindex, and -1
+    // gives it one without adding a tab stop for every mod in the list.
+    if (!row.hasAttribute('tabindex')) row.setAttribute('tabindex', '-1');
+    row.focus({ preventScroll: true });
+    row.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  // One locate button per row, hidden until the filter is active: with no filter
+  // every row is already in context, and `display: none` keeps ~400 buttons out
+  // of the tab order. It goes in the last cell so it lands at the right edge of
+  // the row, clear of the mod name and its Nexus link.
+  rows.forEach(function (r) {
+    var cell = r.cells[r.cells.length - 1];
+    if (!cell) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'modlist-locate';
+    btn.title = 'Show in list';
+    btn.setAttribute('aria-label', 'Show this row in the list');
+    btn.innerHTML = '<i class="fa fa-crosshairs"></i>';
+    cell.appendChild(btn);
+  });
+
   tbody.addEventListener('click', function (e) {
-    var sep = e.target.closest('tr.modlist-folder');
-    if (sep) toggle(sep);
+    if (e.target.closest('a')) return; // Nexus links keep working
+    var row = e.target.closest('tr');
+    if (!row) return;
+    // While filtering, the whole row is the locate target, so the button is an
+    // affordance rather than the only way in. Otherwise a folder row toggles.
+    if (e.target.closest('.modlist-locate') || filtering()) reveal(row);
+    else if (isFolder(row)) toggle(row);
   });
   tbody.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    var sep = e.target.closest('tr.modlist-folder');
-    if (sep) { e.preventDefault(); toggle(sep); }
+    if (e.target.closest('.modlist-locate')) return; // the button fires its own click
+    var row = e.target.closest('tr');
+    if (!row) return;
+    e.preventDefault();
+    if (filtering()) reveal(row);
+    else if (isFolder(row)) toggle(row);
+  });
+
+  // Let the flash re-run if the same row is located twice.
+  tbody.addEventListener('animationend', function (e) {
+    if (e.animationName !== 'modlist-located') return;
+    var row = e.target.closest('tr');
+    if (row) row.classList.remove('modlist-located');
   });
 
   if (toggleAllBtn) {
@@ -256,8 +333,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   input.addEventListener('input', applyVisibility);
-  applyVisibility();
-  updateToggleLabel();
+
+  // Open on the sections rather than on several hundred mods: a collapsed list
+  // reads as an outline of the load order, and the filter and the locate button
+  // are how you get from there to a specific mod.
+  setAll(true);
 
   // Autofocus the filter. Deferred past this DOMContentLoaded tick so it runs
   // after the theme's own documentFocus() (which focuses #R-body-inner on load).

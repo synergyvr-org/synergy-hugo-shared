@@ -9,6 +9,35 @@ Anything marked **breaking** needs a matching change in the site before it works
 (usually a new key in `[params.synergy]` or a new file). See the README for what
 a site is expected to supply.
 
+## v0.8.0 — 2026-08-23
+
+### Added
+- "Show in list" on every mod-list row. After filtering down to the row you
+  wanted, clicking it (or the crosshair at its right edge) drops the filter,
+  opens just the folders that row is buried under, and scrolls to its actual
+  place in the load order, with a flash to mark where you landed. It answers the
+  question a filter can't: what loads around this. The control only appears while
+  a filter is active, since without one every row is already in context.
+
+### Changed
+- Mod lists open with their folders collapsed, so a page starts as an outline of
+  the load order's sections rather than several hundred mod names. The filter and
+  "show in list" are how you get from there to a single mod.
+
+### Fixed
+- A separator that isn't a folder but does carry a depth (a list's title banner,
+  its "End Of List" marker) now closes the folders above it instead of counting
+  as a leaf inside the last one. Collapsing everything used to swallow the end
+  marker into the folder before it.
+- The filter no longer re-walks the folder structure and re-reads every row's
+  text on each keystroke; both are computed once, which also means the reveal and
+  the collapsing read the same ancestor chain and can't disagree about where a
+  row lives.
+- `btn-inline` and `file` emitted their own surrounding whitespace, so a pill at
+  the end of a sentence rendered with a space before the punctuation ("hit Expand
+  all ."). Trimmed. That tightens up 97 spots across the two sites, and there was
+  nowhere relying on the stray space to separate a pill from an adjacent word.
+
 ## v0.7.0 — 2026-08-23
 
 ### Added

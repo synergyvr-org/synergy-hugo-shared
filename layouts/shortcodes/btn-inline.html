@@ -1,5 +1,11 @@
-{{ if .Params }}
-  <span class="btn-inline"><i class="fa fa-{{ .Get 0 }}"></i> {{ .Inner | .Page.RenderString }}</span>
-{{ else }}
-  <span class="btn-inline">{{ .Inner | .Page.RenderString }}</span>
-{{ end }}
+{{- /* Styles text as a UI button the reader clicks. Optional Font Awesome icon
+       name as the first argument.
+
+       The whitespace trims matter: these pills land mid-sentence, so an
+       untrimmed template puts a space between the pill and whatever punctuation
+       follows it ("hit Expand all ."). */ -}}
+{{- if .Params -}}
+<span class="btn-inline"><i class="fa fa-{{ .Get 0 }}"></i> {{ .Inner | .Page.RenderString }}</span>
+{{- else -}}
+<span class="btn-inline">{{ .Inner | .Page.RenderString }}</span>
+{{- end -}}

@@ -231,4 +231,63 @@
     font-weight: bold;
     letter-spacing: 0.5px;
   }
+
+  // "Show in list" (see custom.js). Hidden until there's a filter to leave,
+  // which also keeps one button per mod out of the tab order.
+  //
+  // Positioned against the row rather than floated in the cell. Floating left it
+  // sitting at the top of the cell's content box, which is taller than the
+  // button, so the icon rode ~3.5px high. Centering on the row is exact and
+  // doesn't depend on the font's metrics; the flex centering does the same for
+  // the glyph inside the button, whose inline box isn't centered on its line box
+  // either. Cells are `vertical-align: top`, so there's nothing to inherit here.
+  .modlist-locate {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.25rem;
+    background: none;
+    border: 0;
+    color: #999;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--mgo-gold);
+    }
+  }
+
+  // The containing block for the button above.
+  tbody tr {
+    position: relative;
+  }
+
+  // The flash that marks where you landed. An inset shadow rather than a
+  // background: separators carry their section color inline, and animating
+  // background-color would drop that color for the length of the animation.
+  tbody tr.modlist-located > td {
+    animation: modlist-located 2.2s ease-out 1;
+  }
+}
+
+@keyframes modlist-located {
+  0%, 25% { box-shadow: inset 0 0 0 9999px #ffd86b3d; }
+  100% { box-shadow: inset 0 0 0 9999px #ffd86b00; }
+}
+
+// While filtering, every row is a locate target, so the whole row is clickable
+// and the buttons come out.
+.modlist.filtering {
+  .modlist-locate { display: flex; }
+  .modlist-table tbody tr { cursor: pointer; }
+
+  // The button is out of flow, so the row has to make room for it by hand or a
+  // long version string would run underneath it.
+  .modlist-table tbody tr > td:last-child { padding-right: 2rem; }
 }
