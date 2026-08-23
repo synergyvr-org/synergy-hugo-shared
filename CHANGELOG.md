@@ -9,6 +9,22 @@ Anything marked **breaking** needs a matching change in the site before it works
 (usually a new key in `[params.synergy]` or a new file). See the README for what
 a site is expected to supply.
 
+## v0.7.0 — 2026-08-23
+
+### Added
+- The screenshots behind the Overwrite, Virtual Memory, Shader Cache, and
+  SE-mods-in-VR pages moved here from the MGO site. None of them show anything
+  MGO-specific (they're MO2's Overwrite folder, Windows' System settings, the
+  NVIDIA control panel, and a Skyrim SE/LE comparison), so both sites can draw
+  on the same copies. **Breaking** for a site that was relying on its own copy:
+  pin this tag in the same commit that removes it.
+
+### Fixed
+- `caption` decided whether to draw its `icon` layout by counting parameters, so
+  any caption passing a fourth one (`no-retina="true"`) got the icon layout with
+  no icon to put in it, and emitted an `<img>` with an empty filename. It now
+  keys off the `icon` param, which is what it meant all along.
+
 ## v0.6.0 — 2026-08-22
 
 ### Changed

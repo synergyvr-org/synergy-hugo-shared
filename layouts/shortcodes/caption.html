@@ -37,8 +37,12 @@
   <a href="{{ $img.href }}">
     <img id="img-{{ $name }}" src="{{ $img.src }}"{{ with $img.srcset }} srcset="{{ . }}"{{ end }}{{ with $img.w }} width="{{ . }}" height="{{ $img.h }}"{{ end }}>
   </a>
-  {{ if len .Params | le 4 }}
+  {{- /* An `icon` param puts a small image beside the caption text. Gate on the
+         param itself: this used to key off the number of params, so any caption
+         that passed a fourth (`no-retina`) took the icon layout and emitted an
+         <img> with an empty name. */ -}}
   {{- $iconName := .Get "icon" -}}
+  {{ if $iconName }}
   {{- $iconAsset := resources.Get (printf "images/%s.%s" $iconName $type) -}}
   <div class="caption flex">
     <div>
