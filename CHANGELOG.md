@@ -9,6 +9,15 @@ Anything marked **breaking** needs a matching change in the site before it works
 (usually a new key in `[params.synergy]` or a new file). See the README for what
 a site is expected to supply.
 
+## v0.8.4 — 2026-08-23
+
+### Changed
+- Mod list separators no longer draw a rule above themselves, so a list's
+  sections run flush the way they do in MO2. It also stops the line interrupting
+  the gradient down a list. Checked against MO2's own pane, which draws nothing
+  between adjacent sections that share a color: on the FUS lists that means the
+  authors' run of inline notes reads as one block, as it does in MO2.
+
 ## v0.8.3 — 2026-08-23
 
 ### Fixed

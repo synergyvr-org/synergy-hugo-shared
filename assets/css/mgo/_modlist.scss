@@ -169,10 +169,9 @@
     background: linear-gradient(to right, #672c9f, #5a2a85);
   }
 
-  // Row separation for every separator.
-  .modlist-separator td {
-    border-top: 1px solid var(--mgo-btn-inline);
-  }
+  // No rule above a separator: MO2 runs its sections flush against each other,
+  // and with a gradient down the list the separators already read as distinct
+  // bands. A line between them only interrupted the ramp.
 
   // Only folders (names with a leading "#") are clickable collapse toggles.
   .modlist-folder td {
