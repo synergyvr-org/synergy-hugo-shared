@@ -9,6 +9,16 @@ Anything marked **breaking** needs a matching change in the site before it works
 (usually a new key in `[params.synergy]` or a new file). See the README for what
 a site is expected to supply.
 
+## v0.8.1 — 2026-08-23
+
+### Fixed
+- The hairline between the sidebar and the topbar took a flat gray from the
+  theme, which is duller than any chrome lighter than near-black. On Synergy's
+  slate panels it read as a notch in the corner rather than as a divider.
+  Translucent white now, so it lifts whatever color a site gives its chrome:
+  against Synergy's `#3a4653` the line lands on `#4e5964`, and MGO's goes from
+  `#474747` to a fainter `#303030`.
+
 ## v0.8.0 — 2026-08-23
 
 ### Added
