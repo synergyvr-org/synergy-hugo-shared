@@ -14,12 +14,12 @@
   --INTERNAL-CODE-INLINE-color: #eeeeee;
   --INTERNAL-TOPBAR-BG-color: #191919;
   --INTERNAL-MENU-HEADER-BORDER-color: #191919;
-  // The hairline between the sidebar and the topbar. The theme ships a flat gray
-  // for it, which works against near-black chrome but is duller than any lighter
-  // panel, so on a site that lifts its chrome the line reads as a gap in the
-  // corner instead of a divider. Translucent white lifts whatever color a site
-  // sets, so this one value suits both.
-  --INTERNAL-MENU-TOPBAR-SEPARATOR-color: rgba(255, 255, 255, 0.1);
+  // No hairline between the sidebar and the topbar. The theme draws one there in
+  // a flat gray, which suits chrome that's near-black but is duller than any
+  // lighter panel, so on a site that lifts its chrome the line reads as a notch
+  // in the corner rather than a divider. Both of our sites give the sidebar and
+  // the topbar the same color anyway, so there's no boundary for it to mark.
+  --INTERNAL-MENU-TOPBAR-SEPARATOR-color: transparent;
   --INTERNAL-MAIN-TITLES-H2-font-weight: normal;
   --LOGO-font: Futura, 'Roboto Flex';
   --LOGO-font-size: 0.8rem;
