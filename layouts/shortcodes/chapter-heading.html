@@ -1,3 +1,9 @@
+{{- /* A linked card on a chapter index page: heading + blurb + "Read more".
+
+       The WHOLE card is a single <a>, so the Inner content must not contain
+       links (markdown or raw). Nested anchors are illegal HTML: the browser
+       force-closes the outer <a> at the inner one, which reparents the rest of
+       the card (.chapter-heading-body included) as a sibling of the card. */ -}}
 <style>
   {{ if .Get "img" }}
   .chapter-heading .gif.{{ .Get "img" | default "" }} {

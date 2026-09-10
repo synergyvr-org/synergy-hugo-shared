@@ -112,8 +112,18 @@
 
 <div class="modlist-diff">
   <p class="modlist-diff-summary">
-    <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>
-    {{- if $added }}, plus these <strong>{{ len $added }}</strong> mods{{ else }}, and adds nothing of its own{{ end }}.
+    {{- /* Only claim "everything in base" when it's true. A successor build
+           usually both adds and removes, and the removals group below would
+           contradict a blanket superset claim. */ -}}
+    {{- if and $added $removed }}
+    <strong>{{ $listLabel }}</strong> adds <strong>{{ len $added }}</strong> {{ if eq (len $added) 1 }}mod{{ else }}mods{{ end }} over <strong>{{ $baseLabel }}</strong>, and drops <strong>{{ len $removed }}</strong>.
+    {{- else if $added }}
+    <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>, plus these <strong>{{ len $added }}</strong> mods.
+    {{- else if $removed }}
+    <strong>{{ $listLabel }}</strong> is <strong>{{ $baseLabel }}</strong> minus these <strong>{{ len $removed }}</strong> {{ if eq (len $removed) 1 }}mod{{ else }}mods{{ end }}.
+    {{- else }}
+    <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>, and adds nothing of its own.
+    {{- end }}
   </p>
   {{- range $cats }}
     {{- $items := where $added "cat" . }}

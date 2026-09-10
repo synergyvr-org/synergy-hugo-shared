@@ -9,6 +9,18 @@ Anything marked **breaking** needs a matching change in the site before it works
 (usually a new key in `[params.synergy]` or a new file). See the README for what
 a site is expected to supply.
 
+## v0.8.5 — 2026-09-10
+
+### Fixed
+- `modlist-diff` claimed the newer list "includes everything in" the base even
+  when its own removals group said otherwise. The summary now matches what the
+  diff found: "adds N over X, and drops M" when both happened, the original
+  superset phrasing when nothing was removed (the FUS pages render exactly as
+  before), and a "minus these N" form for a pure trim.
+- A doc comment on `chapter-heading` recording that its Inner must never
+  contain a link: the whole card is one `<a>`, and a nested anchor makes the
+  browser split the card apart.
+
 ## v0.8.4 — 2026-08-23
 
 ### Changed
