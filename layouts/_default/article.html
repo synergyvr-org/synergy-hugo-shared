@@ -1,4 +1,6 @@
-{{ $pages := .CurrentSection.Pages.ByWeight.Reverse }}
+{{/* Hidden pages (hidden = true) are reachable directly but never offered as
+     the next read, matching their absence from the menu. */}}
+{{ $pages := where .CurrentSection.Pages.ByWeight.Reverse "Params.hidden" "ne" true }}
 <article class="default">
   <header class="headline">
     {{- partial "content-header.html" . }}

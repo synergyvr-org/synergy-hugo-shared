@@ -118,7 +118,7 @@
     {{- if and $added $removed }}
     <strong>{{ $listLabel }}</strong> adds <strong>{{ len $added }}</strong> {{ if eq (len $added) 1 }}mod{{ else }}mods{{ end }} over <strong>{{ $baseLabel }}</strong>, and drops <strong>{{ len $removed }}</strong>.
     {{- else if $added }}
-    <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>, plus these <strong>{{ len $added }}</strong> mods.
+    <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>, plus {{ if eq (len $added) 1 }}this <strong>1</strong> mod{{ else }}these <strong>{{ len $added }}</strong> mods{{ end }}.
     {{- else if $removed }}
     <strong>{{ $listLabel }}</strong> is <strong>{{ $baseLabel }}</strong> minus these <strong>{{ len $removed }}</strong> {{ if eq (len $removed) 1 }}mod{{ else }}mods{{ end }}.
     {{- else }}

@@ -1,4 +1,6 @@
-{{ $pages := .CurrentSection.Pages.ByWeight.Reverse }}
+{{/* Hidden pages (hidden = true) stay out of the chapter's next link, matching
+     their absence from the menu. */}}
+{{ $children := where .Pages.ByWeight "Params.hidden" "ne" true }}
 <article class="chapter narrow">
   <header class="headline">
     {{- partial "content-header.html" . }}
@@ -6,7 +8,9 @@
 
 {{ partial "heading.html" . }}{{ partial "heading-post.html" . }}
 {{ partial "article-content.html" . }}
-  <div class="next"><a href="{{ (index .Pages 0).RelPermalink }}">{{ (index .Pages 0).LinkTitle }} <i class="fa fa-circle-right"></i></a></div>
+  {{ with index $children 0 }}
+  <div class="next"><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <i class="fa fa-circle-right"></i></a></div>
+  {{ end }}
 
   <footer class="footline">
     {{- partial "content-footer.html" . }}
