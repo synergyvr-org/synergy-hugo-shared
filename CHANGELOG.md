@@ -7,6 +7,11 @@ Anything marked **breaking** needs a matching change in the site before it works
 ## Unreleased
 
 ### Fixed
+- The end-of-chapter "next page" fallthrough skips hidden chapters too, so the last page before a hidden chapter links past it. (The last page of a hidden chapter dead-ends rather than linking onward.)
+
+## v0.8.6 — 2026-10-06
+
+### Fixed
 - Pluralize `modlist-diff` summaries appropriately.
 - Pages marked `hidden = true` no longer appear as a "next page" link. (A chapter whose children are all hidden renders no next link at all.)
 

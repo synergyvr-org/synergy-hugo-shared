@@ -11,8 +11,10 @@
   {{ with $pages.Next . }}
     <div class="next"><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <i class="fa fa-circle-right"></i></a></div>
   {{ else }}
-    {{/* Last page in the chapter: link on to the next chapter. */}}
-    {{ $chapters := .Site.Home.Sections.ByWeight.Reverse }}
+    {{/* Last page in the chapter: link on to the next (non-hidden) chapter.
+         Inside a hidden chapter there's no next at all: the current section
+         isn't in the filtered list, so Next returns nothing. */}}
+    {{ $chapters := where .Site.Home.Sections.ByWeight.Reverse "Params.hidden" "ne" true }}
     {{ with $chapters.Next .CurrentSection }}
     <div class="next"><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <i class="fa fa-circle-right"></i></a></div>
     {{ end }}
