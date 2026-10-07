@@ -4,7 +4,12 @@ Notable changes to the shared Hugo layer behind Synergy Team's documentation sit
 
 Anything marked **breaking** needs a matching change in the site before it works (usually a new key in `[params.synergy]` or a new file). See the README for what a site is expected to supply.
 
-## Unreleased
+## v0.8.8 - 2026-10-06
+
+### Added
+- `modlist-diff` counts version updates: mods enabled in both lists whose version column changed. The summary gains an "N mods carry version updates" sentence (with a "carries the same mods as" lead-in when nothing was added or dropped), and a collapsible "Updated in X" group lists each mod with its old → new versions.
+
+## v0.8.7 — 2026-10-06
 
 ### Fixed
 - The end-of-chapter "next page" fallthrough skips hidden chapters too, so the last page before a hidden chapter links past it. (The last page of a hidden chapter dead-ends rather than linking onward.)

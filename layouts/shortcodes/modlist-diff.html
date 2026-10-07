@@ -44,6 +44,7 @@
        several CSVs, in which case we compare against the union of what they
        enable. */ -}}
 {{- $baseNames := slice -}}
+{{- $baseVer := dict -}}
 {{- range $p := split $basePath "," -}}
   {{- $rows := (partial "synergy/csv.html" (strings.TrimSpace $p)).rows -}}
   {{- range $i, $row := $rows -}}
@@ -51,6 +52,7 @@
       {{- $n := strings.TrimSpace (index $row 1) -}}
       {{- if and (not (hasSuffix $n "_separator")) (eq (strings.TrimSpace (index $row 0)) "+") -}}
         {{- $baseNames = $baseNames | append $n -}}
+        {{- if ge (len $row) 5 -}}{{- $baseVer = merge $baseVer (dict $n (strings.TrimSpace (index $row 4))) -}}{{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -68,6 +70,7 @@
 {{- /* Walk the newer list, tagging each added mod with the category it sits
        under. Separator labels may carry leading "#" depth markers. */ -}}
 {{- $added := slice -}}
+{{- $updated := slice -}}
 {{- $cat := $otherLabel -}}
 {{- range $i, $row := $listRows -}}
   {{- if and (gt $i 0) (ge (len $row) 2) -}}
@@ -87,6 +90,14 @@
         {{- $url := "" -}}
         {{- if ge (len $row) 4 -}}{{- $url = strings.TrimSpace (index $row 3) -}}{{- end -}}
         {{- $added = $added | append (dict "cat" $cat "name" $n "url" $url) -}}
+      {{- end -}}
+    {{- else if and (eq (strings.TrimSpace (index $row 0)) "+") (ge (len $row) 5) -}}
+      {{- /* Enabled in both lists: a changed version column is an update. */ -}}
+      {{- $old := index $baseVer $n | default "" -}}
+      {{- $new := strings.TrimSpace (index $row 4) -}}
+      {{- if and (ne $old $new) (not (findRE $ignore $n)) -}}
+        {{- $url := strings.TrimSpace (index $row 3) -}}
+        {{- $updated = $updated | append (dict "name" $n "old" $old "new" $new "url" $url) -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -121,9 +132,12 @@
     <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>, plus {{ if eq (len $added) 1 }}this <strong>1</strong> mod{{ else }}these <strong>{{ len $added }}</strong> mods{{ end }}.
     {{- else if $removed }}
     <strong>{{ $listLabel }}</strong> is <strong>{{ $baseLabel }}</strong> minus these <strong>{{ len $removed }}</strong> {{ if eq (len $removed) 1 }}mod{{ else }}mods{{ end }}.
+    {{- else if $updated }}
+    <strong>{{ $listLabel }}</strong> carries the same mods as <strong>{{ $baseLabel }}</strong>.
     {{- else }}
     <strong>{{ $listLabel }}</strong> includes everything in <strong>{{ $baseLabel }}</strong>, and adds nothing of its own.
     {{- end }}
+    {{- with $updated }} Another <strong>{{ len . }}</strong> {{ if eq (len .) 1 }}mod has been updated{{ else }}mods have been updated{{ end }}.{{ end }}
   </p>
   {{- range $cats }}
     {{- $items := where $added "cat" . }}
@@ -133,6 +147,18 @@
       <ul class="modlist-diff-list">
         {{- range $items }}
         <li>{{ if .url }}<a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>{{ else }}{{ .name }}{{ end }}</li>
+        {{- end }}
+      </ul>
+    </div>
+  </details>
+  {{- end }}
+  {{- with $updated }}
+  <details class="disclosure" id="{{ printf "%s-updates" $prefix | anchorize }}">
+    <summary>Updated in {{ $listLabel }} <span class="modlist-diff-count">{{ len . }}</span></summary>
+    <div class="disclosure-body">
+      <ul class="modlist-diff-list">
+        {{- range . }}
+        <li>{{ if .url }}<a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>{{ else }}{{ .name }}{{ end }} <span class="modlist-diff-version">{{ with .old }}{{ . }}{{ else }}?{{ end }} → {{ with .new }}{{ . }}{{ else }}?{{ end }}</span></li>
         {{- end }}
       </ul>
     </div>
