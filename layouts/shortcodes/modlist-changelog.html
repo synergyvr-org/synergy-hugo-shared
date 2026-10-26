@@ -1,0 +1,323 @@
+{{- /* A release changelog between two mod-list CSVs, in Keep a Changelog shape,
+       with a Markdown copy to download. Usage:
+
+         {{< modlist-changelog base="mgo-4-rc4.1.csv" list="mgo-4-rc4.4.csv"
+              base-label="RC4.1" list-label="RC4.4" >}}
+
+       Where `modlist-diff` compares *enabled* sets (right for the FUS pages,
+       whose variants are profiles over one catalogue), this compares the lists
+       themselves, release to release:
+
+         Added      in `list` only, grouped by top-level folder
+         Swapped    annotated replacements (see below)
+         Renamed    annotated, or one name left and one arrived under the same
+                    Nexus ID
+         Updated    in both, with a different version column
+         Now enabled / disabled by default
+                    in both, with the status flipped
+         Removed    in `base` only, grouped by its old folder
+         Moved      in both, under a different top-level folder. Last, and
+                    outside Keep a Changelog's sections in the Markdown, since
+                    a folder reshuffle is more curiosity than change.
+
+       Versions are listed old → new and never judged: authors' version strings
+       don't compare reliably (2.43 → 2.5 is an upgrade).
+
+       Annotations come from site data, at data/changelogs/<list CSV name>.toml
+       by default (`notes` names a different file). Everything is optional:
+
+         exclude = ["Discovered Map Marker All"]   # left out entirely
+
+         [[swap]]                     # out of Added/Removed, into Swapped
+         from = ["Old A", "Old B"]    # a string or a list
+         to = "New"
+         note = "Why, in Markdown."
+
+         [[rename]]                   # for renames the ID match can't see
+         from = "LOD Distance - Quality (24GB VRAM Recommended)"
+         to = "LOD Distance - Quality"
+
+         [notes]                      # shown under the mod, in any section
+         "Mod name" = "Markdown."
+
+       A swap or rename only applies when every `from` is gone and every `to`
+       is new in this comparison, so one file can serve several comparisons on
+       a page (cumulative since the last release and since some older one).
+
+       `base` takes a single CSV here, unlike `modlist-diff`: a release has one
+       predecessor. `ignore` (regex) works as it does there. */ -}}
+
+{{- $basePath := .Get "base" -}}
+{{- $listPath := .Get "list" -}}
+{{- $baseLabel := .Get "base-label" | default "the base list" -}}
+{{- $listLabel := .Get "list-label" | default "this list" -}}
+{{- $ignore := .Get "ignore" | default "Conflict Resolution Patches|Synthesis for" -}}
+{{- $notesKey := .Get "notes" | default (path.Base $listPath | strings.TrimSuffix ".csv") -}}
+{{- $page := .Page -}}
+
+{{- $ann := dict -}}
+{{- with site.Data.changelogs -}}{{- with index . $notesKey -}}{{- $ann = . -}}{{- end -}}{{- end -}}
+{{- $exclude := slice -}}{{- with $ann.exclude -}}{{- $exclude = . -}}{{- end -}}
+{{- $notes := dict -}}{{- with $ann.notes -}}{{- $notes = . -}}{{- end -}}
+
+{{- $old := partial "synergy/modlist-index.html" (dict "path" $basePath "ignore" $ignore "exclude" $exclude) -}}
+{{- $new := partial "synergy/modlist-index.html" (dict "path" $listPath "ignore" $ignore "exclude" $exclude) -}}
+{{- $oldMods := $old.mods -}}
+{{- $newMods := $new.mods -}}
+
+{{- $gone := slice -}}
+{{- range $old.order -}}{{- if not (index $newMods .) -}}{{- $gone = $gone | append . -}}{{- end -}}{{- end -}}
+{{- $came := slice -}}
+{{- range $new.order -}}{{- if not (index $oldMods .) -}}{{- $came = $came | append . -}}{{- end -}}{{- end -}}
+
+{{- /* Annotated swaps and renames claim their mods first. */ -}}
+{{- $used := newScratch -}}
+{{- $swapped := slice -}}
+{{- $renamed := slice -}}
+{{- range $kind := slice "swap" "rename" -}}
+  {{- range $entry := index $ann $kind | default slice -}}
+    {{- $from := $entry.from -}}{{- if not (reflect.IsSlice $from) -}}{{- $from = slice $from -}}{{- end -}}
+    {{- $to := $entry.to -}}{{- if not (reflect.IsSlice $to) -}}{{- $to = slice $to -}}{{- end -}}
+    {{- $ok := true -}}
+    {{- range $from -}}{{- if or (not (in $gone .)) (index ($used.Get "gone" | default dict) .) -}}{{- $ok = false -}}{{- end -}}{{- end -}}
+    {{- range $to -}}{{- if or (not (in $came .)) (index ($used.Get "came" | default dict) .) -}}{{- $ok = false -}}{{- end -}}{{- end -}}
+    {{- if $ok -}}
+      {{- range $from -}}{{- $used.SetInMap "gone" . true -}}{{- end -}}
+      {{- range $to -}}{{- $used.SetInMap "came" . true -}}{{- end -}}
+      {{- $item := dict "from" $from "to" $to "note" ($entry.note | default "") -}}
+      {{- if eq $kind "swap" -}}{{- $swapped = $swapped | append $item -}}{{- else -}}{{- $renamed = $renamed | append $item -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Then automatic renames: exactly one name left and exactly one arrived
+       under the same real Nexus ID. Many mods share an ID (preset families,
+       patch hubs), so anything other than one-for-one is left alone. */ -}}
+{{- $byId := newScratch -}}
+{{- range $gone -}}
+  {{- if not (index ($used.Get "gone" | default dict) .) -}}
+    {{- $id := (index $oldMods .).id -}}
+    {{- if and $id (ne $id "0") (ne $id "-1") -}}{{- $byId.Add (printf "g%s" $id) (slice .) -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $came -}}
+  {{- if not (index ($used.Get "came" | default dict) .) -}}
+    {{- $id := (index $newMods .).id -}}
+    {{- if and $id (ne $id "0") (ne $id "-1") -}}{{- $byId.Add (printf "c%s" $id) (slice .) -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $g := $gone -}}
+  {{- if not (index ($used.Get "gone" | default dict) $g) -}}
+    {{- $id := (index $oldMods $g).id -}}
+    {{- $gs := $byId.Get (printf "g%s" $id) | default slice -}}
+    {{- $cs := $byId.Get (printf "c%s" $id) | default slice -}}
+    {{- if and (eq (len $gs) 1) (eq (len $cs) 1) -}}
+      {{- $c := index $cs 0 -}}
+      {{- $used.SetInMap "gone" $g true -}}
+      {{- $used.SetInMap "came" $c true -}}
+      {{- $renamed = $renamed | append (dict "from" (slice $g) "to" (slice $c) "note" "") -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $added := slice -}}
+{{- range $came -}}{{- if not (index ($used.Get "came" | default dict) .) -}}{{- $added = $added | append . -}}{{- end -}}{{- end -}}
+{{- $removed := slice -}}
+{{- range $gone -}}{{- if not (index ($used.Get "gone" | default dict) .) -}}{{- $removed = $removed | append . -}}{{- end -}}{{- end -}}
+
+{{- $updated := slice -}}
+{{- $enabled := slice -}}
+{{- $disabled := slice -}}
+{{- $moved := slice -}}
+{{- range $new.order -}}
+  {{- $o := index $oldMods . -}}
+  {{- if $o -}}
+    {{- $m := index $newMods . -}}
+    {{- if and $m.ver (ne $o.ver $m.ver) -}}{{- $updated = $updated | append . -}}{{- end -}}
+    {{- if and (not $o.on) $m.on -}}{{- $enabled = $enabled | append . -}}{{- end -}}
+    {{- if and $o.on (not $m.on) -}}{{- $disabled = $disabled | append . -}}{{- end -}}
+    {{- if ne $o.folder $m.folder -}}{{- $moved = $moved | append . -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $addedFolders := slice -}}
+{{- range $added -}}{{- $f := (index $newMods .).folder -}}{{- if not (in $addedFolders $f) -}}{{- $addedFolders = $addedFolders | append $f -}}{{- end -}}{{- end -}}
+{{- $removedFolders := slice -}}
+{{- range $removed -}}{{- $f := (index $oldMods .).folder -}}{{- if not (in $removedFolders $f) -}}{{- $removedFolders = $removedFolders | append $f -}}{{- end -}}{{- end -}}
+
+{{- /* The Markdown copy. Notes go on their own sub-bullet so a long one can't
+       run into the version or folder text on the same line. */ -}}
+{{- $md := slice (printf "# %s: changes since %s" $listLabel $baseLabel) "" -}}
+{{- if $added -}}
+  {{- $md = $md | append "## Added" "" -}}
+  {{- range $f := $addedFolders -}}
+    {{- $md = $md | append (printf "### %s" $f) "" -}}
+    {{- range $added -}}{{- $m := index $newMods . -}}{{- if eq $m.folder $f -}}
+      {{- $line := printf "- %s" (partial "synergy/modlist-md-link.html" $m) -}}
+      {{- if not $m.on -}}{{- $line = printf "%s (disabled by default)" $line -}}{{- end -}}
+      {{- $md = $md | append $line -}}
+      {{- with index $notes . -}}{{- $md = $md | append (printf "  - %s" .) -}}{{- end -}}
+    {{- end -}}{{- end -}}
+    {{- $md = $md | append "" -}}
+  {{- end -}}
+{{- end -}}
+{{- if or $swapped $renamed $updated $enabled $disabled -}}
+  {{- $md = $md | append "## Changed" "" -}}
+  {{- range $section := slice (dict "title" "Swapped" "items" $swapped) (dict "title" "Renamed" "items" $renamed) -}}
+    {{- if $section.items -}}
+      {{- $md = $md | append (printf "### %s" $section.title) "" -}}
+      {{- range $sw := $section.items -}}
+        {{- $fromParts := slice -}}{{- range $sw.from -}}{{- $fromParts = $fromParts | append (partial "synergy/modlist-md-link.html" (index $oldMods .)) -}}{{- end -}}
+        {{- $toParts := slice -}}{{- range $sw.to -}}{{- $toParts = $toParts | append (partial "synergy/modlist-md-link.html" (index $newMods .)) -}}{{- end -}}
+        {{- $md = $md | append (printf "- %s → %s" (delimit $fromParts " + ") (delimit $toParts " + ")) -}}
+        {{- with $sw.note -}}{{- $md = $md | append (printf "  - %s" .) -}}{{- end -}}
+      {{- end -}}
+      {{- $md = $md | append "" -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $updated -}}
+    {{- $md = $md | append "### Updated" "" -}}
+    {{- range $updated -}}
+      {{- $md = $md | append (printf "- %s: %s → %s" (partial "synergy/modlist-md-link.html" (index $newMods .)) ((index $oldMods .).ver | default "?") (index $newMods .).ver) -}}
+      {{- with index $notes . -}}{{- $md = $md | append (printf "  - %s" .) -}}{{- end -}}
+    {{- end -}}
+    {{- $md = $md | append "" -}}
+  {{- end -}}
+  {{- range $section := slice (dict "title" "Now enabled by default" "items" $enabled) (dict "title" "Now disabled by default" "items" $disabled) -}}
+    {{- if $section.items -}}
+      {{- $md = $md | append (printf "### %s" $section.title) "" -}}
+      {{- range $section.items -}}
+        {{- $md = $md | append (printf "- %s" (partial "synergy/modlist-md-link.html" (index $newMods .))) -}}
+        {{- with index $notes . -}}{{- $md = $md | append (printf "  - %s" .) -}}{{- end -}}
+      {{- end -}}
+      {{- $md = $md | append "" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $removed -}}
+  {{- $md = $md | append "## Removed" "" -}}
+  {{- range $f := $removedFolders -}}
+    {{- $md = $md | append (printf "### %s" $f) "" -}}
+    {{- range $removed -}}{{- $m := index $oldMods . -}}{{- if eq $m.folder $f -}}
+      {{- $md = $md | append (printf "- %s" (partial "synergy/modlist-md-link.html" $m)) -}}
+      {{- with index $notes . -}}{{- $md = $md | append (printf "  - %s" .) -}}{{- end -}}
+    {{- end -}}{{- end -}}
+    {{- $md = $md | append "" -}}
+  {{- end -}}
+{{- end -}}
+{{- if $moved -}}
+  {{- $md = $md | append "## Moved" "" -}}
+  {{- range $moved -}}
+    {{- $md = $md | append (printf "- %s: %s → %s" (partial "synergy/modlist-md-link.html" (index $newMods .)) (index $oldMods .).folder (index $newMods .).folder) -}}
+    {{- with index $notes . -}}{{- $md = $md | append (printf "  - %s" .) -}}{{- end -}}
+  {{- end -}}
+  {{- $md = $md | append "" -}}
+{{- end -}}
+{{- $mdText := delimit $md "\n" -}}
+
+{{- /* Published as a real file, so the download is a plain link with no script
+       behind it. The hash keeps two comparisons of the same CSVs under
+       different labels from overwriting each other. */ -}}
+{{- $baseName := path.Base $basePath | strings.TrimSuffix ".csv" -}}
+{{- $listName := path.Base $listPath | strings.TrimSuffix ".csv" -}}
+{{- $res := resources.FromString (printf "changelogs/%s--%s-%s.md" $baseName $listName (substr (md5 $mdText) 0 8)) $mdText -}}
+{{- $fileName := printf "%s-changes-since-%s.md" (replaceRE "[^A-Za-z0-9.]+" "-" $listLabel) (replaceRE "[^A-Za-z0-9.]+" "-" $baseLabel) -}}
+
+{{- $phrases := slice -}}
+{{- range $p := slice (slice $added "added") (slice $swapped "swapped") (slice $renamed "renamed") (slice $updated "updated") (slice $enabled "now enabled by default") (slice $disabled "now disabled by default") (slice $removed "removed") (slice $moved "moved") -}}
+  {{- with index $p 0 -}}{{- $phrases = $phrases | append (printf "<strong>%d</strong> %s" (len .) (index $p 1)) -}}{{- end -}}
+{{- end -}}
+{{- $prefix := .Get "id-prefix" | default (printf "%s-changes" (anchorize $baseLabel)) -}}
+
+<div class="modlist-diff modlist-changelog">
+  <p class="modlist-diff-summary">
+    {{- if $phrases }}
+    From <strong>{{ $baseLabel }}</strong> to <strong>{{ $listLabel }}</strong>: {{ delimit $phrases ", " (cond (eq (len $phrases) 2) " and " ", and ") | safeHTML }}.
+    {{- else }}
+    No changes from <strong>{{ $baseLabel }}</strong> to <strong>{{ $listLabel }}</strong>.
+    {{- end }}
+    <a class="modlist-changelog-download" href="{{ $res.RelPermalink }}" download="{{ $fileName }}"><i class="fa fa-download"></i> Download as Markdown</a>
+  </p>
+  {{- if $added }}
+  <details class="disclosure" id="{{ $prefix }}-added">
+    <summary>Added <span class="modlist-diff-count">{{ len $added }}</span></summary>
+    <div class="disclosure-body">
+      {{- range $f := $addedFolders }}
+      <p class="modlist-changelog-folder">{{ $f }}</p>
+      <ul class="modlist-diff-list">
+        {{- range $added }}{{ $m := index $newMods . }}{{ if eq $m.folder $f }}
+        <li>{{ partial "synergy/modlist-link.html" $m }}{{ if not $m.on }} <span class="modlist-diff-version">disabled by default</span>{{ end }}{{ with index $notes . }}<span class="modlist-changelog-note">{{ $page.RenderString . }}</span>{{ end }}</li>
+        {{- end }}{{ end }}
+      </ul>
+      {{- end }}
+    </div>
+  </details>
+  {{- end }}
+  {{- range $section := slice (dict "id" "swapped" "title" "Swapped" "items" $swapped) (dict "id" "renamed" "title" "Renamed" "items" $renamed) }}
+  {{- if $section.items }}
+  <details class="disclosure" id="{{ $prefix }}-{{ $section.id }}">
+    <summary>{{ $section.title }} <span class="modlist-diff-count">{{ len $section.items }}</span></summary>
+    <div class="disclosure-body">
+      <ul class="modlist-diff-list">
+        {{- range $sw := $section.items }}
+        <li>{{ range $i, $n := $sw.from }}{{ if $i }} + {{ end }}{{ partial "synergy/modlist-link.html" (index $oldMods $n) }}{{ end }} → {{ range $i, $n := $sw.to }}{{ if $i }} + {{ end }}{{ partial "synergy/modlist-link.html" (index $newMods $n) }}{{ end }}{{ with $sw.note }}<span class="modlist-changelog-note">{{ $page.RenderString . }}</span>{{ end }}</li>
+        {{- end }}
+      </ul>
+    </div>
+  </details>
+  {{- end }}
+  {{- end }}
+  {{- if $updated }}
+  <details class="disclosure" id="{{ $prefix }}-updated">
+    <summary>Updated <span class="modlist-diff-count">{{ len $updated }}</span></summary>
+    <div class="disclosure-body">
+      <ul class="modlist-diff-list">
+        {{- range $updated }}
+        <li>{{ partial "synergy/modlist-link.html" (index $newMods .) }} <span class="modlist-diff-version">{{ (index $oldMods .).ver | default "?" }} → {{ (index $newMods .).ver }}</span>{{ with index $notes . }}<span class="modlist-changelog-note">{{ $page.RenderString . }}</span>{{ end }}</li>
+        {{- end }}
+      </ul>
+    </div>
+  </details>
+  {{- end }}
+  {{- range $section := slice (dict "id" "enabled" "title" "Now enabled by default" "items" $enabled) (dict "id" "disabled" "title" "Now disabled by default" "items" $disabled) }}
+  {{- if $section.items }}
+  <details class="disclosure" id="{{ $prefix }}-{{ $section.id }}">
+    <summary>{{ $section.title }} <span class="modlist-diff-count">{{ len $section.items }}</span></summary>
+    <div class="disclosure-body">
+      <ul class="modlist-diff-list">
+        {{- range $section.items }}
+        <li>{{ partial "synergy/modlist-link.html" (index $newMods .) }}{{ with index $notes . }}<span class="modlist-changelog-note">{{ $page.RenderString . }}</span>{{ end }}</li>
+        {{- end }}
+      </ul>
+    </div>
+  </details>
+  {{- end }}
+  {{- end }}
+  {{- if $removed }}
+  <details class="disclosure" id="{{ $prefix }}-removed">
+    <summary>Removed <span class="modlist-diff-count">{{ len $removed }}</span></summary>
+    <div class="disclosure-body">
+      {{- range $f := $removedFolders }}
+      <p class="modlist-changelog-folder">{{ $f }}</p>
+      <ul class="modlist-diff-list">
+        {{- range $removed }}{{ $m := index $oldMods . }}{{ if eq $m.folder $f }}
+        <li>{{ partial "synergy/modlist-link.html" $m }}{{ with index $notes . }}<span class="modlist-changelog-note">{{ $page.RenderString . }}</span>{{ end }}</li>
+        {{- end }}{{ end }}
+      </ul>
+      {{- end }}
+    </div>
+  </details>
+  {{- end }}
+  {{- if $moved }}
+  <details class="disclosure" id="{{ $prefix }}-moved">
+    <summary>Moved <span class="modlist-diff-count">{{ len $moved }}</span></summary>
+    <div class="disclosure-body">
+      <ul class="modlist-diff-list">
+        {{- range $moved }}
+        <li>{{ partial "synergy/modlist-link.html" (index $newMods .) }} <span class="modlist-diff-version">{{ (index $oldMods .).folder }} → {{ (index $newMods .).folder }}</span>{{ with index $notes . }}<span class="modlist-changelog-note">{{ $page.RenderString . }}</span>{{ end }}</li>
+        {{- end }}
+      </ul>
+    </div>
+  </details>
+  {{- end }}
+</div>

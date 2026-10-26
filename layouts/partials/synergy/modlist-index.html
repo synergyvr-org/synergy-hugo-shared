@@ -1,0 +1,67 @@
+{{- /* Parses a mod-list CSV into a lookup of its mods. Returns a dict:
+
+         mods   name → dict(name, on, id, url, ver, folder)
+         order  the mod names in load order
+
+       `folder` is the mod's top-level MO2 folder. Exports mark folders three
+       different ways, so the file's convention is detected first:
+
+         hierarchical (MGO, Synergy)  "#" depth prefixes; depth 1 is a
+                                      top-level folder, and an unprefixed
+                                      separator is an inline note
+         numbered (FUS)               "3.1 Name" separators are folders, and
+                                      everything else is an inline note
+         flat (Nordic, MGO 3.8.8.1)   every separator is a folder
+
+       Older exports (3.8.8.1) write separators with an empty status and an ID
+       of -1 instead of a `_separator` suffix, so either form counts.
+
+       Takes a dict: path (assets-relative CSV), ignore (regex, optional), and
+       exclude (slice of exact names, optional). Matching rows are skipped. */ -}}
+{{- $rows := (partial "synergy/csv.html" .path).rows -}}
+{{- $ignore := .ignore | default "" -}}
+{{- $exclude := .exclude | default slice -}}
+{{- $numRE := `^[0-9]+(\.[0-9]+)*[ ]` -}}
+
+{{- $hier := false -}}
+{{- $numbered := false -}}
+{{- range $i, $r := $rows -}}
+  {{- if and (gt $i 0) (ge (len $r) 2) -}}
+    {{- $st := strings.TrimSpace (index $r 0) -}}
+    {{- $n := strings.TrimSpace (index $r 1) -}}
+    {{- $id := "" -}}{{- if ge (len $r) 3 -}}{{- $id = strings.TrimSpace (index $r 2) -}}{{- end -}}
+    {{- if or (hasSuffix $n "_separator") (and (eq $st "") (eq $id "-1")) -}}
+      {{- $raw := strings.TrimSuffix "_separator" $n -}}
+      {{- if hasPrefix $raw "#" -}}{{- $hier = true -}}{{- end -}}
+      {{- if findRE $numRE (strings.TrimSpace $raw) -}}{{- $numbered = true -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $s := newScratch -}}
+{{- $order := slice -}}
+{{- $folder := "Other" -}}
+{{- range $i, $r := $rows -}}
+  {{- if and (gt $i 0) (ge (len $r) 2) -}}
+    {{- $st := strings.TrimSpace (index $r 0) -}}
+    {{- $n := strings.TrimSpace (index $r 1) -}}
+    {{- $id := "" -}}{{- if ge (len $r) 3 -}}{{- $id = strings.TrimSpace (index $r 2) -}}{{- end -}}
+    {{- $url := "" -}}{{- if ge (len $r) 4 -}}{{- $url = strings.TrimSpace (index $r 3) -}}{{- end -}}
+    {{- $ver := "" -}}{{- if ge (len $r) 5 -}}{{- $ver = strings.TrimSpace (index $r 4) -}}{{- end -}}
+    {{- if or (hasSuffix $n "_separator") (and (eq $st "") (eq $id "-1")) -}}
+      {{- $raw := strings.TrimSuffix "_separator" $n -}}
+      {{- $label := strings.TrimSpace (strings.TrimLeft "#" $raw) -}}
+      {{- if $hier -}}
+        {{- if and (hasPrefix $raw "#") (not (hasPrefix $raw "##")) -}}{{- $folder = $label -}}{{- end -}}
+      {{- else if $numbered -}}
+        {{- if findRE $numRE $label -}}{{- $folder = $label -}}{{- end -}}
+      {{- else -}}
+        {{- $folder = $label -}}
+      {{- end -}}
+    {{- else if and (ne $n "") (not (and $ignore (findRE $ignore $n))) (not (in $exclude $n)) (not (index ($s.Get "mods" | default dict) $n)) -}}
+      {{- $s.SetInMap "mods" $n (dict "name" $n "on" (eq $st "+") "id" $id "url" $url "ver" $ver "folder" $folder) -}}
+      {{- $order = $order | append $n -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return dict "mods" ($s.Get "mods" | default dict) "order" $order -}}

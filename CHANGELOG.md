@@ -4,6 +4,13 @@ Notable changes to the shared Hugo layer behind Synergy Team's documentation sit
 
 Anything marked **breaking** needs a matching change in the site before it works (usually a new key in `[params.synergy]` or a new file). See the README for what a site is expected to supply.
 
+## Unreleased
+
+### Added
+- `modlist-changelog`, a release changelog between two mod-list CSVs in traditional changelog format: Added and Removed (grouped by top-level folder), plus _Swapped_, _Renamed_, _Updated_, and _Now enabled/disabled by default_, with _Moved_ at the end as more curiosity. Unlike `modlist-diff`, it compares the full load order, rather than just the enabled sets, so a mod switched on by default reads as exactly that instead of as an addition. Renames are detected when one name leaves and one arrives under the same Nexus ID. Each changelog is also published as a Markdown file, with a download link (styled like the count badges) beside its summary.
+- Changelog annotations in site data (`data/changelogs/<list CSV name>.toml`): identifies swaps and renames that the CSVs can't reveal on their own, Markdown notes on individual mods, and names to exclude. A swap only applies to a comparison containing all of its mods, so one file can serve several changelogs on a page.
+- `synergy/modlist-index` partial, which reads any of the three folder conventions the exports use (`#` depth prefixes, numbered folders among inline notes, and flat lists, including 3.8.8.1's suffix-less separators).
+
 ## v0.8.8 - 2026-10-06
 
 ### Added

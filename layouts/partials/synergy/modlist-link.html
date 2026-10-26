@@ -1,0 +1,3 @@
+{{- /* A mod's name, Nexus-linked when its row has a URL. Takes a mod dict from
+       synergy/modlist-index.html. */ -}}
+{{- if .url }}<a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>{{ else }}{{ .name }}{{ end -}}

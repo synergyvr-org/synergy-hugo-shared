@@ -1,0 +1,7 @@
+{{- /* Markdown for a mod's name: escaped, and linked when its row has a URL.
+       Mod names routinely contain [brackets] and underscores. Takes a mod dict
+       from synergy/modlist-index.html. */ -}}
+{{- $name := replaceRE "([\\[\\]*_`])" "\\$1" .name -}}
+{{- $out := $name -}}
+{{- if .url -}}{{- $out = printf "[%s](%s)" $name .url -}}{{- end -}}
+{{- return $out -}}
